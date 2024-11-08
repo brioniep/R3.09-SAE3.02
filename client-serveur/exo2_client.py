@@ -13,7 +13,7 @@ def client_program():
         if message.lower() == 'arret':
             client_socket.send(message.encode())
             break
-        if message.lower() == 'exit':
+        if message.lower() == 'bye':
             client_socket.send(message.encode())
             break
 
