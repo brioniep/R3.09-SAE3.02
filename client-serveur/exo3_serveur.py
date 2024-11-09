@@ -21,20 +21,22 @@ def ouverture(port, reply):
             conn.send(reply.encode())
             print("Réponse envoyée")
 
+            if message.lower() == "bye":
+                print("Le client s'est déconnecté...")
+
             if message.lower() == "arret":
                 print("Fermeture du serveur...")
                 conn.close()
                 server_socket.close()
                 return
 
-
-
-
-
-
 if __name__ == "__main__":
-    port = 12345  # Exemple de port
-    reply = "Message reçu"  # Réponse du serveur
+    port = 12345 
+    reply = "Message reçu"
     thread = threading.Thread(target=ouverture, args=(port, reply))
     thread.start()
     thread.join()
+
+
+
+    

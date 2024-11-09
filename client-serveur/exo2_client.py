@@ -1,5 +1,7 @@
 import socket
 
+
+
 def client_program():
     host = '127.0.0.1'  # Adresse IP du serveur
     port = 12345  # Port du serveur
@@ -23,6 +25,9 @@ def client_program():
         print(f"Réponse du serveur : {data}")
 
     client_socket.close()  # Fermer la connexion
+
+
+
 
 if __name__ == "__main__":
     client_program()
