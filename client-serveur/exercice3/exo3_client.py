@@ -49,14 +49,12 @@ if __name__ == "__main__":
     client1 = Client()
     client1.connexion()
 
-    # Créer des threads pour l'envoi et la réception des messages
-    thread_reception = threading.Thread(target=client1.reception)
-    thread_envoi = threading.Thread(target=client1.envoi)
+    t1 = threading.Thread(target=client1.reception)
+    t2 = threading.Thread(target=client1.envoi)
 
-    # Lancer les threads
-    thread_reception.start()
-    thread_envoi.start()
+    t1.start()
+    t2.start()
 
     # Attendre que les threads se terminent
-    thread_reception.join()
-    thread_envoi.join()
+    t1.join()
+    t2.join()
