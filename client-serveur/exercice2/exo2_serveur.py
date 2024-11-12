@@ -26,14 +26,13 @@ def ouverture(port, reply):
                 conn.close()
                 server_socket.close()
                 return
-
-
-
-
+            if message == "bye":
+                print("Le client a été déconnecté")
+                break
 
 
 if __name__ == "__main__":
-    port = 12345  # Exemple de port
+    port = 12345 
     reply = "Message reçu"  # Réponse du serveur
     thread = threading.Thread(target=ouverture, args=(port, reply))
     thread.start()
