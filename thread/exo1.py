@@ -16,3 +16,4 @@ t1.join() # le join permet d'attendre la fin des thread avant de passer a la sui
 t2.join()
 
 
+print("Fin du programme")
