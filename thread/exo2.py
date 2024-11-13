@@ -6,7 +6,6 @@ def compte_a_rebours(n, thread_id):
         print(f"thread {thread_id} : {i}")
         time.sleep(0.5) 
 
-# Valeurs de départ différentes pour chaque thread
 n1 = 5
 n2 = 3
 
