@@ -9,7 +9,7 @@ def ouverture(port, reply):
 
     while True:
         conn, address = server_socket.accept()
-        print(f"Connexion acceptée de {address}")
+        print(f"Client connecté")
 
         while True:
             message = conn.recv(1024).decode()

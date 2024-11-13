@@ -18,7 +18,7 @@ class Serveur:
     def reception(self):
         while True:
             self.client_socket, address = self.server_socket.accept()
-            print(f"Connexion acceptée de {address}")
+            print(f"Client connecté")
             
             while True:
                 message = self.client_socket.recv(1024).decode()
