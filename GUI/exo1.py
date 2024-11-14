@@ -22,15 +22,46 @@ class MainWindow(QMainWindow):
 
         self.quitter.clicked.connect(QApplication.instance().quit)
         self.bouton.clicked.connect(self.afficher_message)
+        self.text.returnPressed.connect(self.afficher_message)
+
+
+
+
+        self.bouton.setStyleSheet("background-color: lightblue; color: black; font-weight: bold;")
+        self.text.setStyleSheet("border: 1px solid gray; padding: 5px; font-size: 14px;")
+
+
 
         widget = QWidget()
         widget.setLayout(layout)
         self.setCentralWidget(widget)
 
     def afficher_message(self):
-        nom = self.text.text()
-        self.label.setText(f"Bonjour {nom}")
-        self.text.clear()
+        if self.text.text() == "":
+            self.label.setText("Vous n'avez pas entré de nom")
+        
+        else:
+            nom = self.text.text()
+            self.label.setText(f"Bonjour {nom}")
+            self.text.clear()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         
 if __name__ == '__main__':
     app = QApplication(sys.argv)
@@ -38,3 +69,8 @@ if __name__ == '__main__':
     fenetre.resize(300, 200)
     fenetre.show()
     sys.exit(app.exec())
+
+
+
+
+
