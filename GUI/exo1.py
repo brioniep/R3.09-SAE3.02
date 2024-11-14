@@ -32,6 +32,9 @@ class MainWindow(QMainWindow):
 
 
 
+        
+
+
         widget = QWidget()
         widget.setLayout(layout)
         self.setCentralWidget(widget)
@@ -39,6 +42,7 @@ class MainWindow(QMainWindow):
     def afficher_message(self):
         if self.text.text() == "":
             self.label.setText("Vous n'avez pas entré de nom")
+    
         
         else:
             nom = self.text.text()
