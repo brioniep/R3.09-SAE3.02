@@ -23,11 +23,6 @@ class MainWindow(QMainWindow):
         layout.addWidget(self.label)
         layout.addWidget(self.combo)
 
-
-
-
-
-
         self.bouton.setStyleSheet("background-color: lightblue; color: black; font-weight: bold;")
         self.text.setStyleSheet("border: 1px solid gray; padding: 5px; font-size: 14px;")
 
@@ -51,6 +46,9 @@ class MainWindow(QMainWindow):
 
         elif self.text.text() != float:
             self.label.setText("Erreur ! Veuillez entrer un nombre")
+
+        elif self.text.text() == 0:
+            self.label.setText("La conversion est impossible, veuillez entre un nombre supérieur à 0")
         
 
 
