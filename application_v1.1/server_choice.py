@@ -1,7 +1,6 @@
-import sys
-import re
-from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, QSplitter, QListWidget, QMessageBox
-from PyQt5.QtCore import Qt
+import sys, re , socket
+from PyQt5.QtWidgets import *
+from PyQt5.QtCore import *
 
 class ServerChoiceWindow(QMainWindow):
     from style_server_choice import apply_styles
@@ -150,6 +149,16 @@ def open_login():
     from connexion import LoginWindow
     window = LoginWindow()
     window.show()
+
+
+
+
+
+
+
+
+
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
