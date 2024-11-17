@@ -72,6 +72,28 @@ class Client:
 
         self.client_socket.close()
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 if __name__ == "__main__":
     client_1 = Client('127.0.0.1', 12345)
     client_1.connexion()
