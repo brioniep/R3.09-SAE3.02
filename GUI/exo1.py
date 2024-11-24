@@ -1,6 +1,6 @@
 import sys
-from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QLabel, QLineEdit, QPushButton, QWidget
-
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import QTimer
 class MainWindow(QMainWindow):
  
     def __init__(self):
@@ -14,26 +14,20 @@ class MainWindow(QMainWindow):
         self.bouton = QPushButton("ok")
         self.label = QLabel("")
         self.quitter = QPushButton("quitter")
+        self.bonjour = QPushButton("bonjour")
+        self.label2 = QLabel("")
 
         layout.addWidget(self.text)
         layout.addWidget(self.bouton)
         layout.addWidget(self.label)
         layout.addWidget(self.quitter)
+        layout.addWidget(self.label2)
+
 
         self.quitter.clicked.connect(QApplication.instance().quit)
         self.bouton.clicked.connect(self.afficher_message)
         self.text.returnPressed.connect(self.afficher_message)
-
-
-
-
-        self.bouton.setStyleSheet("background-color: lightblue; color: black; font-weight: bold;")
-        self.text.setStyleSheet("border: 1px solid gray; padding: 5px; font-size: 14px;")
-
-
-
-        
-
+        self.bonjour.clicked.connect(self.bienvenue)
 
         widget = QWidget()
         widget.setLayout(layout)
@@ -51,22 +45,12 @@ class MainWindow(QMainWindow):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+    def effacer_message(self):
+        self.label2.clear()  # Efface le texte du label
 
 
         
+
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     fenetre = MainWindow()
