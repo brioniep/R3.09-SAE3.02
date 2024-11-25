@@ -1,15 +1,12 @@
-import sys
-import re
-import socket
-import time
+import sys, os, json, re, socket, time
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from index import IndexWindow  # Remplacez "index_window" par le nom du fichier contenant la classe IndexWindow
+from index import IndexWindow  # Remplacez par le chemin correct de votre fichier IndexWindow
 
 
 class ServerChoiceWindow(QMainWindow):
-    from style_server_choice import apply_styles
+    from style_server_choice import apply_styles  # Assurez-vous que ce module existe
 
     def __init__(self):
         super().__init__()
@@ -32,7 +29,7 @@ class ServerChoiceWindow(QMainWindow):
         self.name_label = QLabel("Nom:")
         self.name_input = QLineEdit()
         self.name_input.setFont(self.font())
-        self.name_input.setText("")  # Nom par défaut
+        self.name_input.setText("")  
 
         self.save_button = QPushButton("Enregistrer")
         self.save_button.setFont(self.font())
@@ -95,7 +92,7 @@ class ServerChoiceWindow(QMainWindow):
         self.setCentralWidget(central_widget)
         self.apply_styles()
 
-        self.add_default_configuration()
+        self.load_configurations()  # Charger les configurations sauvegardées
 
         self.connection_thread = None
         self.connection_worker = None
@@ -117,8 +114,9 @@ class ServerChoiceWindow(QMainWindow):
             QMessageBox.warning(self, "Erreur", "Le nom ne peut pas être vide.")
             return
 
-        self.configurations.append((ip, port, name))
+        self.configurations.append({"ip": ip, "port": port, "name": name})
         self.config_list.addItem(f"{name} ({ip}:{port})")
+        self.save_configurations_to_file()  # Sauvegarde dans le fichier
         self.ip_input.clear()
         self.port_input.clear()
         self.name_input.clear()
@@ -129,8 +127,21 @@ class ServerChoiceWindow(QMainWindow):
             row = self.config_list.row(selected_item)
             self.config_list.takeItem(row)
             del self.configurations[row]
+            self.save_configurations_to_file()  # Sauvegarde dans le fichier après suppression
         else:
             QMessageBox.warning(self, "Erreur", "Veuillez sélectionner une configuration à supprimer !")
+
+    def load_configurations(self):
+        if os.path.exists("configurations.json"):
+            with open("configurations.json", "r") as file:
+                self.configurations = json.load(file)
+                for config in self.configurations:
+                    name, ip, port = config["name"], config["ip"], config["port"]
+                    self.config_list.addItem(f"{name} ({ip}:{port})")
+
+    def save_configurations_to_file(self):
+        with open("configurations.json", "w") as file:
+            json.dump(self.configurations, file)
 
     def disconnect(self):
         if self.connection_thread and self.connection_thread.isRunning():
@@ -139,10 +150,6 @@ class ServerChoiceWindow(QMainWindow):
             self.connection_thread.wait()
         self.close()
         open_login()
-
-    def add_default_configuration(self):
-        self.configurations.append(("192.168.1.14", "12345", "Serveur-maitre"))
-        self.config_list.addItem("Serveur-maitre (192.168.1.14:12345)")
 
     def is_valid_ip(self, ip):
         regex = r"^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){2}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
@@ -189,16 +196,13 @@ class ServerChoiceWindow(QMainWindow):
 
         # Ouvrir la fenêtre IndexWindow
         self.index_window = IndexWindow()
-        self.index_window.disconnect_signal.connect(self.show)  # Connecter le signal de déconnexion pour revenir
+        self.index_window.disconnect_signal.connect(self.show)
         self.index_window.show()
-        self.hide()  # Masquer la fenêtre actuelle
-
+        self.hide()
 
     def on_connection_failed(self):
         self.status_label.setText("État de la connexion : Échec de connexion. Nouvel essai...")
         self.status_label.setStyleSheet("font-size: 18px; color: red;")
-
-        # Arrêter le thread proprement en cas de fermeture
         if not self.connection_thread.isRunning():
             self.connection_thread.quit()
 

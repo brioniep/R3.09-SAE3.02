@@ -1,6 +1,6 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QMessageBox
-from PyQt5.QtCore import QTimer, Qt
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
 from server_choice import ServerChoiceWindow
 
 class LoginWindow(QWidget):
