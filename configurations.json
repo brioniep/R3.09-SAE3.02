@@ -1,1 +1,1 @@
-[{"ip": "127.0.0.1", "port": "12345", "name": "localhost"}]
+[{"ip": "127.0.0.1", "port": "12345", "name": "localhost"}, {"ip": "192.168.1.14", "port": "12345", "name": "server_maitre"}, {"ip": "1.1.1.1", "port": "1", "name": "bienvenue"}, {"ip": "1.1.1.1", "port": "1", "name": "sur"}, {"ip": "1.1.1.1", "port": "1", "name": "le"}, {"ip": "1.1.1.1", "port": "1", "name": "meilleur"}, {"ip": "1.1.1.1", "port": "1", "name": "projet jamais vu"}]
