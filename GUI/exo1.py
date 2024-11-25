@@ -1,6 +1,6 @@
 import sys
 from PyQt6.QtWidgets import *
-from PyQt6.QtCore import QTimer
+
 class MainWindow(QMainWindow):
  
     def __init__(self):
@@ -20,36 +20,24 @@ class MainWindow(QMainWindow):
         layout.addWidget(self.label)
         layout.addWidget(self.quitter)
 
-
         self.quitter.clicked.connect(QApplication.instance().quit)
         self.bouton.clicked.connect(self.afficher_message)
         self.text.returnPressed.connect(self.afficher_message)
-
-
 
         widget = QWidget()
         widget.setLayout(layout)
         self.setCentralWidget(widget)
 
-
-        
-
     def afficher_message(self):
         if self.text.text() == "":
             self.label.setText("Vous n'avez pas entré de nom")
-    
         else:
             nom = self.text.text()
             self.label.setText(f"Bonjour {nom}")
             self.text.clear()
 
-
-
     def effacer_message(self):
-        self.label2.clear()  # Efface le texte du label
-
-
-        
+        self.label2.clear()
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
@@ -57,8 +45,3 @@ if __name__ == '__main__':
     fenetre.resize(300, 200)
     fenetre.show()
     sys.exit(app.exec())
-
-
-
-
-
