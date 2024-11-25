@@ -1,82 +1,94 @@
 import sys
 from PyQt6.QtWidgets import *
-class MainWindow(QMainWindow):
- 
+
+class MaFenetre(QWidget):
     def __init__(self):
-        super().__init__()
-        self.setWindowTitle("Convertion de Température")
+        super().__init__()  # Appelle le constructeur parent
+        self.setWindowTitle("QGridLayout avec une classe")
+        self.initUI()  # Méthode pour créer l'interface utilisateur
 
-        layout = QVBoxLayout()
+    def initUI(self):
+        # Création du QGridLayout
+        grid_layout = QGridLayout()
 
-        layout.addWidget(QLabel("Température :"))
-        self.text = QLineEdit()
-        self.label = QLabel("°C")
-        self.bouton = QPushButton("convertir")
-        self.combo = QComboBox()
-        self.label = QLabel("")
+        # Création des widgets
+        self.label1 = QLabel("Température : ")
+        self.input1 = QLineEdit()
+        self.label2 = QLabel("°C")
 
-        self.combo.addItems(["°C -> K", "F -> °C"])
+        self.bouton1 = QPushButton("Convertir")
+        self.option1 = QComboBox()  # Utilisation de self.option1
+        self.option1.addItems(["°C -> K", "K -> °C"])
 
-        layout.addWidget(self.combo)
-        layout.addWidget(self.text)
-        layout.addWidget(self.bouton)
-        layout.addWidget(self.label)
-        layout.addWidget(self.combo)
+        self.label3 = QLabel("Conversion : ")
+        self.label4 = QLabel("0")
+        self.label5 = QLabel("K")
 
-        self.bouton.setStyleSheet("background-color: lightblue; color: black; font-weight: bold;")
-        self.text.setStyleSheet("border: 1px solid gray; padding: 5px; font-size: 14px;")
+        self.bouton2 = QPushButton("?")
 
+        # Ajout des widgets dans le QGridLayout
+        grid_layout.addWidget(self.label1, 0, 0, 1, 2) 
+        grid_layout.addWidget(self.input1, 0, 1)
+        grid_layout.addWidget(self.label2, 0, 2)
 
+        grid_layout.addWidget(self.bouton1, 1, 1)
+        grid_layout.addWidget(self.option1, 1, 2)
 
+        grid_layout.addWidget(self.label3, 2, 0)
+        grid_layout.addWidget(self.label4, 2, 1)
+        grid_layout.addWidget(self.label5, 2, 2)
+
+        grid_layout.addWidget(self.bouton2, 3, 3)
+
+        # Connexion du signal currentIndexChanged à la méthode de conversion
+        self.option1.currentIndexChanged.connect(self.update_label)
+        self.bouton1.clicked.connect(self.conversion)
+
+        # Appliquer le layout à la fenêtre
+        self.setLayout(grid_layout)
+
+    def update_label(self, index):
+        # Récupérer l'option sélectionnée
+        option = self.option1.currentText()
         
+        # Logique de mise à jour de label2 en fonction de l'option choisie
+        if option == "°C -> K":
+            self.label2.setText("°C")
+            self.label5.setText("K")
+        elif option == "K -> °C":
+            self.label2.setText("K")
+            self.label5.setText("°C")
 
+    def conversion(self):
+        # Récupérer la température
+        temperature = self.input1.text()
+        try:
+            temperature = float(temperature)
+        except ValueError:
+            self.label4.setText("Erreur")
+            return
 
-        widget = QWidget()
-        widget.setLayout(layout)
-        self.setCentralWidget(widget)
+        # Récupérer l'option sélectionnée
+        option = self.option1.currentText()
 
+        if option == 0:
+            temperature = 0
 
-
-
-    def convertisseur(self,)->float:
-
-
-        if self.text.text() == "":
-            self.label.setText("Vous n'avez pas entré de température")
-
-        elif self.text.text() != float:
-            self.label.setText("Erreur ! Veuillez entrer un nombre")
-
-        elif self.text.text() == 0:
-            self.label.setText("La conversion est impossible, veuillez entre un nombre supérieur à 0")
-        
-
-
-        if self.combo.currentText() == "°C -> K":
-            temperature = float(self.text.text())
+        # Logique de conversion
+        if option == "°C -> K":
             temperature += 273.15
+        elif option == "K -> °C":
+            temperature -= 273.15
 
-            self.label.setText(f"{temperature} K")
+        # Mettre à jour le label4
+        self.label4.setText(str(temperature))
 
-        elif self.combo.currentText() == "F -> °C":
-            temperature = float(self.text.text())
-            temperature = (temperature - 32) * 5/9
 
-            self.label.setText(f"{temperature} °C")
 
-        
 
-def main():
+if __name__ == "__main__":
     app = QApplication(sys.argv)
-    fenetre = MainWindow()
+    fenetre = MaFenetre()
     fenetre.resize(300, 200)
     fenetre.show()
     sys.exit(app.exec())
-        
-if __name__ == '__main__':
-    main()
-
-
-
-
-
