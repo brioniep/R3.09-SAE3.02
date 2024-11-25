@@ -1,5 +1,5 @@
 import sys
-from PyQt5.QtWidgets import *
+from PyQt6.QtWidgets import *
 
 class MaFenetre(QWidget):
     def __init__(self):
@@ -27,7 +27,7 @@ class MaFenetre(QWidget):
         self.bouton2 = QPushButton("?")
 
         # Ajout des widgets dans le QGridLayout
-        grid_layout.addWidget(self.label1, 0, 0)
+        grid_layout.addWidget(self.label1, 0, 0, 1, 2) 
         grid_layout.addWidget(self.input1, 0, 1)
         grid_layout.addWidget(self.label2, 0, 2)
 
@@ -96,4 +96,4 @@ if __name__ == "__main__":
     fenetre = MaFenetre()
     fenetre.resize(300, 200)
     fenetre.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
