@@ -4,6 +4,8 @@ from PyQt6.QtWidgets import *
 from PyQt6.QtCore import *
 
 
+# https://github.com/brioniep/tp_test_leonard_sero
+
 class MaFenetre(QWidget):
     def __init__(self):
         super().__init__()
