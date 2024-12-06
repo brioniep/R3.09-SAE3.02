@@ -1,117 +1,139 @@
 from PyQt5.QtWidgets import *
-from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtCore import pyqtSignal, QThread, QObject
 import os
 import socket
+
+class MonitorConnectionWorker(QObject):
+    """Un worker pour surveiller la connexion au serveur"""
+    connection_lost = pyqtSignal()  # Émet lorsque la connexion est perdue
+
+    def __init__(self, client_socket):
+        super().__init__()
+        self.client_socket = client_socket
+        self._running = True
+
+    def stop(self):
+        """Arrêter la surveillance de la connexion"""
+        self._running = False
+
+    def monitor_connection(self):
+        """Surveille la connexion et émet un signal si la connexion est perdue"""
+        while self._running:
+            try:
+                self.client_socket.send(b"ping")  # Envoie un "ping" pour tester la connexion
+                self.client_socket.recv(1024)  # Attendre une réponse
+            except (socket.error, socket.timeout):
+                self.connection_lost.emit()  # Émettre un signal si la connexion est perdue
+                break
 
 class IndexWindow(QMainWindow):
     disconnect_signal = pyqtSignal()  # Signal pour revenir à la fenêtre précédente
 
-    def __init__(self):
+    def __init__(self, client_socket=None):
         super().__init__()
         self.setWindowTitle("Page d'Envoi de Fichier")
         self.setMinimumSize(600, 400)
 
-        layout = QVBoxLayout()
+        self.client_socket = client_socket  # Conserver la socket si elle est passée
+        if not self.client_socket:
+            self.status_label.setText("Pas de connexion au serveur.")
+            return
 
-        # Zone pour afficher le chemin du fichier
+        layout = QVBoxLayout()
         self.file_path_display = QLineEdit()
         self.file_path_display.setPlaceholderText("Aucun fichier sélectionné")
         self.file_path_display.setReadOnly(True)
 
-        # Bouton pour sélectionner un fichier
         self.select_file_button = QPushButton("Sélectionner un fichier")
         self.select_file_button.clicked.connect(self.select_file)
 
-        # Bouton pour envoyer le fichier
         self.send_file_button = QPushButton("Envoyer le fichier")
-        self.send_file_button.setEnabled(False)  # Désactivé par défaut jusqu'à ce qu'un fichier soit sélectionné
+        self.send_file_button.setEnabled(False)
         self.send_file_button.clicked.connect(self.send_file)
 
-        # Label pour afficher le statut de l'envoi
         self.status_label = QLabel("")
         self.status_label.setStyleSheet("font-size: 16px; color: gray;")
 
-        # Bouton pour déconnexion
         self.disconnect_button = QPushButton("Déconnecter")
         self.disconnect_button.clicked.connect(self.disconnect)
 
-        # Ajouter les widgets au layout
         layout.addWidget(self.file_path_display)
         layout.addWidget(self.select_file_button)
         layout.addWidget(self.send_file_button)
         layout.addWidget(self.status_label)
         layout.addWidget(self.disconnect_button)
 
-        # Créer le conteneur principal
         container = QWidget()
         container.setLayout(layout)
         self.setCentralWidget(container)
 
-        # Attribut pour le chemin du fichier sélectionné
         self.file_path = None
 
+        # Lancer la surveillance de la connexion
+        self.monitor_thread = QThread()
+        self.monitor_worker = MonitorConnectionWorker(self.client_socket)
+        self.monitor_worker.moveToThread(self.monitor_thread)
+        self.monitor_worker.connection_lost.connect(self.on_connection_lost)
+
+        self.monitor_thread.started.connect(self.monitor_worker.monitor_connection)
+        self.monitor_thread.start()
+
     def select_file(self):
-        """Ouvre un dialogue pour sélectionner un fichier et affiche le chemin."""
         file_path, _ = QFileDialog.getOpenFileName(self, "Choisir un fichier")
         if file_path:
             self.file_path = file_path
             self.file_path_display.setText(file_path)
-            self.send_file_button.setEnabled(True)  # Activer le bouton d'envoi
-            self.status_label.setText("")  # Réinitialiser le statut
+            self.send_file_button.setEnabled(True)
+            self.status_label.setText("")
 
     def send_file(self):
-        """Envoie le fichier au serveur."""
         if not self.file_path:
             self.status_label.setText("Aucun fichier sélectionné.")
             self.status_label.setStyleSheet("font-size: 16px; color: red;")
             return
 
+        if not self.client_socket:
+            self.status_label.setText("Erreur : Pas de connexion serveur.")
+            return
+
         try:
-            # Connexion au serveur
-            server_address = ('192.168.1.14', 12345)  # Adresse et port du serveur
-            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                s.connect(server_address)
+            filename = os.path.basename(self.file_path)
+            self.client_socket.send(filename.encode())
+            response = self.client_socket.recv(1024)
+            print(response.decode())
 
-                # Envoi du nom du fichier
-                filename = os.path.basename(self.file_path)
-                s.send(filename.encode())
-                response = s.recv(1024)  # Attendre confirmation du nom
-                print(response.decode())
+            filesize = os.path.getsize(self.file_path)
+            self.client_socket.send(str(filesize).encode())
+            response = self.client_socket.recv(1024)
+            print(response.decode())
 
-                # Envoi de la taille du fichier
-                filesize = os.path.getsize(self.file_path)
-                s.send(str(filesize).encode())
-                response = s.recv(1024)  # Attendre confirmation de la taille
-                print(response.decode())
+            with open(self.file_path, 'rb') as f:
+                while (data := f.read(1024)):
+                    self.client_socket.send(data)
 
-                # Envoi des données du fichier
-                with open(self.file_path, 'rb') as f:
-                    while (data := f.read(1024)):
-                        s.send(data)
+            response = self.client_socket.recv(1024).decode()
+            if response == "file_result":
+                with open("compilation_result.txt", 'wb') as f:
+                    data = self.client_socket.recv(1024)
+                    while data:
+                        f.write(data)
+                        data = self.client_socket.recv(1024)
 
-                # Attente de la réponse et du fichier résultat
-                response = s.recv(1024).decode()
-                if response == "file_result":
-                    with open("compilation_result.txt", 'wb') as f:
-                        data = s.recv(1024)
-                        while data:
-                            f.write(data)
-                            data = s.recv(1024)
-
-                    self.status_label.setText("Résultat de l'exécution disponible sous 'compilation_result.txt'.")
-                    self.status_label.setStyleSheet("font-size: 16px; color: green;")
+                self.status_label.setText("Résultat de l'exécution disponible sous 'compilation_result.txt'.")
+                self.status_label.setStyleSheet("font-size: 16px; color: green;")
 
         except Exception as e:
             self.status_label.setText(f"Erreur lors de l'envoi : {str(e)}")
             self.status_label.setStyleSheet("font-size: 16px; color: red;")
 
     def disconnect(self):
-        """Émettre un signal pour revenir à la fenêtre de connexion."""
-        self.disconnect_signal.emit()  # Émettre le signal pour retourner à la fenêtre précédente
+        if self.client_socket:
+            self.client_socket.close()
+        self.disconnect_signal.emit()
+        self.close()
 
-
-if __name__ == "__main__":
-    app = QApplication([])
-    window = IndexWindow()
-    window.show()
-    app.exec_()
+    def on_connection_lost(self):
+        """Lorsque la connexion est perdue, fermer la fenêtre"""
+        self.status_label.setText("Connexion au serveur perdue.")
+        self.status_label.setStyleSheet("font-size: 16px; color: red;")
+        self.close()

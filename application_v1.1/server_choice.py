@@ -176,26 +176,22 @@ class ServerChoiceWindow(QMainWindow):
         self.status_label.setText(f"État de la connexion : Connexion à {name} ({ip}:{port}) en cours...")
         self.status_label.setStyleSheet("font-size: 18px; color: orange;")
 
-        self.connection_thread = QThread()
-        self.connection_worker = ConnectionWorker(ip, port)
-        self.connection_worker.moveToThread(self.connection_thread)
+        # Créer la socket et essayer de se connecter
+        self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            self.client_socket.connect((ip, port))
+            self.on_connected(ip, port)
+        except Exception as e:
+            self.status_label.setText("État de la connexion : Échec de connexion.")
+            self.status_label.setStyleSheet("font-size: 18px; color: red;")
+            return
 
-        self.connection_worker.connected.connect(self.on_connected)
-        self.connection_worker.failed.connect(self.on_connection_failed)
-
-        self.connection_thread.started.connect(self.connection_worker.connect_to_server)
-        self.connection_thread.finished.connect(self.connection_worker.deleteLater)
-        self.connection_thread.finished.connect(self.connection_thread.deleteLater)
-
-        self.connection_thread.start()
-
-    def on_connected(self):
-        self.status_label.setText("État de la connexion : Connexion réussie !")
+    def on_connected(self, ip, port):
+        self.status_label.setText(f"État de la connexion : Connexion réussie à {ip}:{port}")
         self.status_label.setStyleSheet("font-size: 18px; color: green;")
-        self.connection_thread.quit()
 
-        # Ouvrir la fenêtre IndexWindow
-        self.index_window = IndexWindow()
+        # Passer la socket au IndexWindow
+        self.index_window = IndexWindow(client_socket=self.client_socket)
         self.index_window.disconnect_signal.connect(self.show)
         self.index_window.show()
         self.hide()

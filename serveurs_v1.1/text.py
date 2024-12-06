@@ -1,24 +1,43 @@
 import time
 
-def consume_ram(duration=120):
-    print(f"Consommation intensive de RAM pendant {duration} secondes...")
+
+def consume_ram(target_ram_mb=1000):
+    """
+    Consomme une quantité définie de RAM en Mo et la maintient jusqu'à la fermeture.
+    
+    :param target_ram_mb: Quantité de RAM à consommer en Mo (par défaut 1000 Mo).
+    """
+    print(f"Allocation de {target_ram_mb} Mo de RAM...")
     
     try:
-        large_data = []  # Initialisation de la liste principale
+        # Créer une liste pour consommer la RAM
+        large_data = [bytearray(1024 * 1024) for _ in range(target_ram_mb)]
         
-        start_time = time.time()
-        while time.time() - start_time < duration:
-            # Chaque itération ajoute environ 100 Mo à la RAM
-            large_data.append(bytearray(100 * 1024 * 1024))  # 100 Mo par itération
-            time.sleep(1)  # Pause d'une seconde entre les ajouts
+        print(f"RAM consommée : {target_ram_mb} Mo")
+        print("La mémoire est maintenue. Appuyez sur Ctrl+C pour terminer.")
+        
+        # Maintenir le programme actif
+        while True:
+            time.sleep(1)
             
-            print(f"RAM consommée : {len(large_data) * 100} Mo")
-        
     except MemoryError:
-        print("Mémoire insuffisante ! Le processus s'est arrêté à cause d'une surcharge.")
+        print("Mémoire insuffisante ! Impossible d'allouer la quantité demandée.")
     finally:
         print("Libération de la mémoire...")
         del large_data  # Libérer la mémoire après utilisation
 
 if __name__ == "__main__":
-    consume_ram()
+    import sys
+    
+    # Vérifier si l'utilisateur a fourni une valeur en argument
+    if len(sys.argv) > 1:
+        try:
+            target_ram_mb = int(sys.argv[1])
+        except ValueError:
+            print("Veuillez fournir une valeur entière pour la quantité de RAM à consommer.")
+            sys.exit(1)
+    else:
+        # Par défaut, consomme 1000 Mo
+        target_ram_mb = 1000
+    
+    consume_ram(target_ram_mb)
