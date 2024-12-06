@@ -8,13 +8,13 @@ class ServeurPrincipal:
     def __init__(self, port_principal=1234, port_secondaire=5678, port_client=9999, hote_client='127.0.0.1'):
         self.port_principal = port_principal
         self.port_secondaire = port_secondaire
-        self.port_client = port_client   # Port du client qui recevra les informations
-        self.hote_client = hote_client   # Adresse IP du client qui recevra les informations
+        self.port_client = port_client
+        self.hote_client = hote_client
         self.socket_principal = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket_secondaire = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.secondaire_lance = False  
-        self.secondaire_actif = False  
-        self.cores_cpu = self.obtenir_cores_cpu()  
+        self.secondaire_lance = False
+        self.secondaire_actif = False
+        self.cores_cpu = self.obtenir_cores_cpu()
 
     def infos_ram(self):
         donnees_ram = os.popen("free -m | awk '/Mem:/ {print $2, $3}'").read().strip().split()
@@ -51,6 +51,11 @@ class ServeurPrincipal:
             elif utilisation_ram < 60.0 and self.secondaire_lance:
                 self.arreter_serveur_secondaire()
                 self.secondaire_lance = False
+
+            client_socket, adresse = self.socket_principal.accept()
+            print(f"Connexion établie avec {adresse}")
+            client_socket.send(b"Bonjour depuis le serveur principal !")
+            client_socket.close()
 
             time.sleep(5)
 
