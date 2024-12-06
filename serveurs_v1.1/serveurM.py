@@ -1,6 +1,5 @@
 import socket
 import os
-import time
 import threading
 
 class ServeurPrincipal:
@@ -15,6 +14,7 @@ class ServeurPrincipal:
         self.secondaire_lance = False
         self.secondaire_actif = False
         self.cores_cpu = self.obtenir_cores_cpu()
+        self.arret_infos = threading.Event()
 
     def infos_ram(self):
         donnees_ram = os.popen("free -m | awk '/Mem:/ {print $2, $3}'").read().strip().split()
@@ -37,11 +37,11 @@ class ServeurPrincipal:
         print(f"Serveur principal en écoute sur le port {self.port_principal}...")
 
         while True:
-            utilisation_ram = self.infos_ram()
-            utilisation_cpu = self.infos_cpu()
+            client_socket, adresse = self.socket_principal.accept()
+            print(f"Connexion établie avec {adresse}")
+            threading.Thread(target=self.reception_fichier, args=(client_socket,)).start()
 
-            print(f"RAM utilisée : {utilisation_ram:.2f}%")
-            print(f"Charge CPU : {utilisation_cpu:.2f}%")
+            utilisation_ram = self.infos_ram()
 
             if utilisation_ram >= 60.0 and not self.secondaire_lance:
                 self.secondaire_actif = True
@@ -52,12 +52,41 @@ class ServeurPrincipal:
                 self.arreter_serveur_secondaire()
                 self.secondaire_lance = False
 
-            client_socket, adresse = self.socket_principal.accept()
-            print(f"Connexion établie avec {adresse}")
-            client_socket.send(b"Bonjour depuis le serveur principal !")
-            client_socket.close()
+    def reception_fichier(self, client_socket):
+        try:
+            directory = 'file-attente'
+            if not os.path.exists(directory):
+                os.makedirs(directory)
 
-            time.sleep(5)
+            filename = b""
+            while b"\n" not in filename:
+                part = client_socket.recv(1024)
+                if not part:
+                    print("Erreur : Connexion fermée avant la réception du nom.")
+                    return
+                filename += part
+            filename = filename.strip(b"\n").decode('utf-8')
+
+            filepath = os.path.join(directory, filename)
+            print(f"Nom du fichier reçu : {filename}")
+
+            with open(filepath, 'wb') as f:
+                while True:
+                    data = client_socket.recv(1024)
+                    if data.endswith(b"END"):
+                        f.write(data[:-3])
+                        break
+                    elif not data:
+                        print("Erreur : Connexion fermée avant la fin de la réception.")
+                        return
+                    f.write(data)
+
+            print(f"Fichier reçu et stocké dans : {filepath}")
+
+        except Exception as e:
+            print(f"Erreur lors de la gestion du client : {e}")
+        finally:
+            client_socket.close()
 
     def lancer_serveur_secondaire(self):
         try:

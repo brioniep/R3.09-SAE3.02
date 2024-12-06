@@ -69,6 +69,8 @@ class MaFenetre(QWidget):
 
 
 
+
+
     def connexion_au_serveur(self):
         ip = self.ip_input.text()
         port = int(self.port_input.text())
@@ -132,19 +134,27 @@ class MaFenetre(QWidget):
 
 
 
+
     def selectionner_fichier(self):
         fichier = QFileDialog.getOpenFileName(self, "Sélectionner un fichier", "", "Tous les fichiers (*);;Fichiers texte (*.txt);;Images (*.png *.xpm *.jpg)")
+        
+        if fichier[0]:
+            extension = os.path.splitext(fichier[0])[1]
+            if extension not in ['.c', '.cpp', '.java', '.py']:
+                QMessageBox.warning(self, "Format de fichier incorrect", "Le format du fichier sélectionné n'est pas supporté. Veuillez choisir un fichier C, C++, Java ou Python.")
+                return
+        
         self.chemin.setText(fichier[0])
-
+        
+        
+        
 
 
     def envoyer_fichier(self):
-        """Envoie le fichier sélectionné au serveur."""
         if not self.est_connecte:
             self.historique_logs.append("Erreur : Pas de connexion au serveur.")
             return
 
-        # Récupérer le chemin du fichier à envoyer
         chemin_fichier = self.chemin.text()
         
         if not chemin_fichier or not os.path.isfile(chemin_fichier):
@@ -152,23 +162,18 @@ class MaFenetre(QWidget):
             return
 
         try:
-            # Ouvrir le fichier en mode binaire
             with open(chemin_fichier, 'rb') as f:
-                # Envoyer le nom du fichier (facultatif, mais utile pour le serveur)
                 fichier_nom = os.path.basename(chemin_fichier)
-                self.socket_client.sendall(fichier_nom.encode('utf-8'))  # Envoi du nom du fichier
-
-                # Envoyer le contenu du fichier
-                while (chunk := f.read(1024)):  # Lire le fichier par morceaux de 1024 octets
+                self.socket_client.sendall(fichier_nom.encode('utf-8') + b"\n")
+                
+                while (chunk := f.read(1024)):
                     self.socket_client.sendall(chunk)
-            
+                
+                self.socket_client.sendall(b"END")  
+
             self.historique_logs.append(f"Fichier '{chemin_fichier}' envoyé avec succès.")
         except Exception as e:
             self.historique_logs.append(f"Erreur lors de l'envoi du fichier : {e}")
-
-
-
-
 
 
 
