@@ -67,8 +67,16 @@ class ServeurPrincipal:
                 filename += part
             filename = filename.strip(b"\n").decode('utf-8')
 
+            base_filename, extension = os.path.splitext(filename)
             filepath = os.path.join(directory, filename)
-            print(f"Nom du fichier reçu : {filename}")
+            counter = 1
+
+            while os.path.exists(filepath):
+                new_filename = f"{base_filename}-{counter}{extension}"
+                filepath = os.path.join(directory, new_filename)
+                counter += 1
+
+            print(f"Nom du fichier reçu : {os.path.basename(filepath)}")
 
             with open(filepath, 'wb') as f:
                 while True:
