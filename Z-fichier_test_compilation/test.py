@@ -1,1 +1,1 @@
-print("fichier executé avec succès !!!!!!!!!!!!!!!")
+print("hello world")

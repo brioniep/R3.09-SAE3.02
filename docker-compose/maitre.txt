@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+  server-maitre:
+    build:
+      context: ./server-maitre  # Changez le contexte de construction pour être le répertoire server-maitre
+      dockerfile: Dockerfile  # Dockerfile est dans le répertoire de build
+    ports:
+      - "1234:1234"
+    mem_limit: 4g  # Limite de mémoire à 4 Go
+    command: python3 /app/server.py  # Lance le script avec python3
+
+
