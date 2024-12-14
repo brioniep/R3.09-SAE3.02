@@ -2,21 +2,20 @@ import os
 import socket
 import threading
 
-class ServeurPrincipal:
+class ServeurEsclave:
 
-    def __init__(self, port_principal=1234, port_client=9999, hote_client='127.0.0.1'):
-        self.port_principal = port_principal
-        self.port_client = port_client
+    def __init__(self, port=1111, hote_client='127.0.0.1'):
+        self.port = port
         self.hote_client = hote_client
-        self.socket_principal = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket_esclave = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    def lancer_serveur_principal(self):
-        self.socket_principal.bind(('0.0.0.0', self.port_principal))
-        self.socket_principal.listen(5)
-        print(f"Serveur principal en écoute sur le port {self.port_principal}...")
+    def lancer_serveur_esclave(self):
+        self.socket_esclave.bind(('0.0.0.0', self.port))
+        self.socket_esclave.listen(5)
+        print(f"Serveur esclave en écoute sur le port {self.port}...")
 
         while True:
-            client_socket, client_address = self.socket_principal.accept()
+            client_socket, client_address = self.socket_esclave.accept()
             print(f"Connexion acceptée de {client_address}")
             threading.Thread(target=self.gestion_fichier, args=(client_socket,)).start()
 
@@ -147,9 +146,281 @@ class ServeurPrincipal:
             client_socket.sendall(f"Erreur lors de l'envoi du fichier : {e}\nEND".encode('utf-8'))
 
 if __name__ == "__main__":
-    serveur = ServeurPrincipal()
+    serveur = ServeurEsclave()
     try:
-        serveur.lancer_serveur_principal()
+        serveur.lancer_serveur_esclave()
     except KeyboardInterrupt:
         print("Arrêt du serveur...")
-        serveur.socket_principal.close()
+        serveur.socket_esclave.close()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import subprocess
+import time
+import threading
+
+def get_container_stats(container_name):
+    """
+    Exécute la commande docker stats pour un conteneur spécifique et récupère les stats en format texte.
+    """
+    command = ["docker", "stats", container_name, "--no-stream", "--format", "'{{.Name}}: {{.MemUsage}}'"]
+    
+    result = subprocess.run(command, capture_output=True, text=True)
+    
+    if result.returncode != 0:
+        print(f"Erreur lors de l'exécution de la commande pour {container_name}: {result.stderr}")
+        print("Commande exécutée : ", " ".join(command))  # Afficher la commande pour vérifier
+        return f"Erreur: Impossible d'obtenir les stats pour {container_name}"
+    
+    return result.stdout.strip()  
+
+def monitor_container(container_name):
+    """
+    Surveille la consommation de la RAM d'un conteneur esclave spécifique.
+    """
+    while True:
+        stats = get_container_stats(container_name)
+        print(stats)
+        time.sleep(10)
+
+def monitor_containers():
+    """
+    Surveille la consommation de la RAM de tous les conteneurs esclaves en utilisant des threads.
+    """
+    slave_containers = [
+        "sae-server-esclave1-1",
+        "sae-server-esclave2-1",
+        "sae-server-esclave3-1",
+        "sae-server-esclave4-1"
+    ]
+    
+    threads = []
+    for container in slave_containers:
+        thread = threading.Thread(target=monitor_container, args=(container,))
+        thread.start()
+        threads.append(thread)
+    
+    for thread in threads:
+        thread.join()
+
+if __name__ == "__main__":
+    monitor_containers()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import socket
+import os
+import threading
+
+# Répertoire de base pour les dossiers clients
+REPERTOIRE_BASE = "./clients"
+if not os.path.exists(REPERTOIRE_BASE):
+    os.makedirs(REPERTOIRE_BASE)
+
+# Correspondance des extensions de fichiers aux ports des serveurs esclaves
+SERVEURS_ESCLAVES = {
+    ".py": 1111,   # Python
+    ".c": 2222,    # C
+    ".cpp": 2222,  # C++
+    ".java": 3333  # Java
+}
+
+# Gestionnaire de connexion client
+def gerer_client(socket_client, adresse_client, id_client):
+    dossier_client = os.path.join(REPERTOIRE_BASE, f"client-{id_client}")
+    os.makedirs(dossier_client, exist_ok=True)
+    print(f"[+] Client {adresse_client} connecté. Dossier créé : {dossier_client}")
+
+    try:
+        while True:
+            # Réception du nom du fichier
+            nom_fichier = socket_client.recv(1024).decode('utf-8').strip()
+            if not nom_fichier:
+                break
+            chemin_fichier = os.path.join(dossier_client, nom_fichier)
+
+            # Réception du contenu du fichier
+            with open(chemin_fichier, 'wb') as fichier:
+                while True:
+                    donnees = socket_client.recv(1024)
+                    if donnees.endswith(b"END"):
+                        fichier.write(donnees[:-3])
+                        break
+                    fichier.write(donnees)
+
+            print(f"[Client-{id_client}] Fichier reçu : {nom_fichier}")
+            chemin_resultat = envoyer_fichier_aux_esclaves(chemin_fichier, nom_fichier)
+            envoyer_resultat_au_client(socket_client, chemin_resultat)
+
+    except Exception as e:
+        print(f"[-] Erreur avec le client-{id_client}: {e}")
+    finally:
+        socket_client.close()
+        print(f"[-] Client {adresse_client} déconnecté.")
+        supprimer_dossier(dossier_client)
+        print(f"[INFO] Dossier client-{id_client} supprimé.")
+
+# Fonction pour envoyer le fichier au serveur esclave approprié
+# Fonction pour envoyer le fichier au serveur esclave approprié
+def envoyer_fichier_aux_esclaves(chemin_fichier, nom_fichier):
+    extension = os.path.splitext(nom_fichier)[1]
+    port_esclave = SERVEURS_ESCLAVES.get(extension)
+
+    if not port_esclave:
+        print(f"[ERREUR] Extension {extension} non supportée.")
+        return None
+
+    # Remplacer "127.0.0.1" par l'adresse IP du conteneur correspondant
+    ip_esclave = {
+        1111: "172.18.0.2",  # IP pour le conteneur qui écoute sur le port 1111 (Python)
+        2222: "172.18.0.3",  # IP pour le conteneur qui écoute sur le port 2222 (C/C++)
+        3333: "172.18.0.4",  # IP pour le conteneur qui écoute sur le port 3333 (Java)
+    }.get(port_esclave)
+
+    if not ip_esclave:
+        print(f"[ERREUR] Aucun conteneur trouvé pour le port {port_esclave}.")
+        return None
+
+    try:
+        socket_esclave = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        socket_esclave.connect((ip_esclave, port_esclave))  # Connexion à l'IP fixe du conteneur
+
+        # Envoi du nom du fichier
+        socket_esclave.sendall(f"{nom_fichier}\n".encode('utf-8'))
+        
+        # Envoi du contenu du fichier
+        with open(chemin_fichier, 'rb') as fichier:
+            while True:
+                donnees = fichier.read(1024)
+                if not donnees:
+                    break
+                socket_esclave.sendall(donnees)
+        socket_esclave.sendall(b"END")
+        print(f"[INFO] Fichier {nom_fichier} envoyé à {ip_esclave}:{port_esclave}.")
+
+        # Réception du résultat depuis l'esclave
+        return recevoir_resultat(socket_esclave)
+
+    except Exception as e:
+        print(f"[ERREUR] Impossible d'envoyer {nom_fichier} à {ip_esclave}:{port_esclave}: {e}")
+        return None
+    finally:
+        socket_esclave.close()
+
+
+def recevoir_resultat(socket_esclave):
+    try:
+        resultat = b""
+        while True:
+            donnees = socket_esclave.recv(1024)
+            if not donnees:
+                raise Exception("Connexion interrompue.")
+            resultat += donnees
+            if b"END" in donnees:
+                resultat = resultat.replace(b"END", b"")
+                break
+        print("[INFO] Résultat reçu de l'esclave.")
+        return resultat
+    except Exception as e:
+        print(f"[ERREUR] Erreur lors de la réception du résultat: {e}")
+        return None
+
+
+
+# Fonction pour envoyer le résultat au client
+def envoyer_resultat_au_client(socket_client, chemin_resultat):
+    if chemin_resultat and os.path.exists(chemin_resultat):
+        try:
+            with open(chemin_resultat, 'rb') as fichier_resultat:
+                while True:
+                    donnees = fichier_resultat.read(1024)
+                    if not donnees:
+                        break
+                    socket_client.sendall(donnees)
+            socket_client.sendall(b"END")
+            print(f"[INFO] Résultat envoyé au client.")
+        except Exception as e:
+            print(f"[ERREUR] Envoi du résultat échoué: {e}")
+
+# Fonction de suppression de dossier
+def supprimer_dossier(dossier):
+    for racine, dossiers, fichiers in os.walk(dossier, topdown=False):
+        for fichier in fichiers:
+            os.remove(os.path.join(racine, fichier))
+        for dossier_vide in dossiers:
+            os.rmdir(os.path.join(racine, dossier_vide))
+    os.rmdir(dossier)
+
+# Serveur principal
+def main():
+    serveur = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    serveur.bind(("0.0.0.0", 1234))
+    serveur.listen(5)
+    print("[SERVEUR] En attente de connexions...")
+    id_client = 0
+
+    try:
+        while True:
+            socket_client, adresse_client = serveur.accept()
+            id_client += 1
+            thread_client = threading.Thread(
+                target=gerer_client, 
+                args=(socket_client, adresse_client, id_client)
+            )
+            thread_client.start()
+    except KeyboardInterrupt:
+        print("[SERVEUR] Arrêté par l'utilisateur.")
+    finally:
+        serveur.close()
+
+if __name__ == "__main__":
+    main()

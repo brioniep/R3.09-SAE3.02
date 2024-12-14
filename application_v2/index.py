@@ -57,14 +57,10 @@ class MaFenetre(QWidget):
         self.selection_fichier.clicked.connect(self.selectionner_fichier)
         self.telecharger.clicked.connect(self.envoyer_fichier)
 
-
     def quitter_app(self):
         if self.est_connecte:
             self.deconnexion_du_serveur()
         self.close()
-
-
-
 
     def connexion_au_serveur(self):
         ip = self.ip_input.text()
@@ -78,7 +74,6 @@ class MaFenetre(QWidget):
             self.socket_client.connect((ip, port))
             self.est_connecte = True
             self.historique_logs.append(f"Connexion réussie à {ip}:{port}")
-
         except socket.error as e:
             self.socket_client = None
             self.est_connecte = False
@@ -99,6 +94,9 @@ class MaFenetre(QWidget):
             self.historique_logs.append("Pas de connexion active.")
             print("Pas de connexion active.")
 
+
+
+
     def selectionner_fichier(self):
         fichier = QFileDialog.getOpenFileName(self, "Sélectionner un fichier", "", "Tous les fichiers (*);;Fichiers texte (*.txt);;Images (*.png *.xpm *.jpg)")
         
@@ -109,7 +107,11 @@ class MaFenetre(QWidget):
                 return
         
         self.chemin.setText(fichier[0])
-        
+
+
+
+
+
 
     def envoyer_fichier(self):
         if not self.est_connecte:
@@ -120,50 +122,26 @@ class MaFenetre(QWidget):
         if not chemin_fichier or not os.path.isfile(chemin_fichier):
             self.historique_logs.append("Erreur : Aucun fichier valide sélectionné.")
             return
-        try:
-            with open(chemin_fichier, 'rb') as f:
-                fichier_nom = os.path.basename(chemin_fichier)
-                self.socket_client.sendall(fichier_nom.encode('utf-8') + b"\n")
 
-                while (chunk := f.read(1024)):
-                    try:
-                        self.socket_client.sendall(chunk)
-                    except socket.error as e:
-                        self.historique_logs.append(f"Erreur d'envoi : {e}")
-                        self.est_connecte = False
-                        return
-                self.socket_client.sendall(b"END")
+        try:
+            with open(chemin_fichier, 'rb') as f:  # Ouvrir le fichier en mode binaire
+                fichier_nom = os.path.basename(chemin_fichier)
+                self.socket_client.sendall(fichier_nom.encode('utf-8') + b"\n")  # Envoi du nom du fichier
+                contenu_fichier = f.read()
+                try:
+                    self.socket_client.sendall(contenu_fichier)  # Envoi binaire du fichier
+                    self.socket_client.sendall(b"\0")  # Signal de fin de transmission (utilisation d'un octet nul)
+                except Exception as e:
+                    print(f"Erreur lors de l'envoi du fichier : {e}")
+                    return
+
             self.historique_logs.append(f"Fichier '{chemin_fichier}' envoyé avec succès.")
             self.chemin.clear()
-            self.reception_resultat()
+
         except Exception as e:
             self.historique_logs.append(f"Erreur lors de l'envoi du fichier : {e}")
 
 
-    def reception_resultat(self):
-        try:
-            self.socket_client.settimeout(10)  # Définir un délai d'attente
-            resultat = b""
-            while True:
-                data = self.socket_client.recv(1024)
-                if not data:
-                    raise Exception("Connexion interrompue.")
-                resultat += data
-                if b"END" in data:
-                    resultat = resultat.replace(b"END", b"")
-                    break
-            self.fichiers_recus.setPlainText(resultat.decode('utf-8'))
-            self.historique_logs.append("Résultat reçu et affiché.")
-        except socket.timeout:
-            self.historique_logs.append("Erreur : Délai d'attente dépassé.")
-        except Exception as e:
-            self.historique_logs.append(f"Erreur lors de la réception : {e}")
-
-
-    def closeEvent(self, event):
-        if self.est_connecte:
-            self.deconnexion_du_serveur()
-        event.accept()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

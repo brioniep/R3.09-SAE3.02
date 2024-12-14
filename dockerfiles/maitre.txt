@@ -11,3 +11,40 @@ COPY file-attente ./file-attente
 COPY liste-envoie ./liste-envoie
 
 CMD ["python3", "server.py"]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Utiliser l'image de base Python
+FROM python:3.9-slim
+
+# Définir le répertoire de travail
+WORKDIR /app
+
+# Installer les dépendances nécessaires
+RUN apt-get update && apt-get install -y \
+    gcc g++ openjdk-17-jdk && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Copier les fichiers dans le conteneur
+COPY server.py .
+
+# Commande de lancement
+CMD ["python3", "server.py"]

@@ -11,3 +11,79 @@ services:
     command: python3 /app/server.py  # Lance le script avec python3
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+root@toto:/home/toto/SAE# cat docker-compose.yml 
+version: '3.9'
+
+services:
+  server-maitre:
+    build:
+      context: ./server-maitre
+    ports:
+      - "1234:1234"
+    networks:
+      - internal-net
+    mem_limit: 2g  # Limite de RAM à 2 Go pour le serveur maître
+
+  server-esclave1:
+    build:
+      context: ./server-esclave1
+    networks:
+      - internal-net
+    mem_limit: 1g  # Limite de RAM à 1 Go pour l'esclave 1
+
+  server-esclave2:
+    build:
+      context: ./server-esclave2
+    networks:
+      - internal-net
+    mem_limit: 1g  # Limite de RAM à 1 Go pour l'esclave 2
+
+  server-esclave3:
+    build:
+      context: ./server-esclave3
+    networks:
+      - internal-net
+    mem_limit: 1g  # Limite de RAM à 1 Go pour l'esclave 3
+
+  server-esclave4:
+    build:
+      context: ./server-esclave4
+    networks:
+      - internal-net
+    mem_limit: 1g  # Limite de RAM à 1 Go pour l'esclave 4
+
+networks:
+  internal-net:
+    driver: bridge
+root@toto:/home/toto/SAE# 
