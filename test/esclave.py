@@ -5,9 +5,8 @@ import subprocess
 
 class ServeurEsclave:
 
-    def __init__(self, port_esclave=1111, port_du_serveur_maitre=1234):
+    def __init__(self, port_esclave=1111):
         self.port_esclave = port_esclave
-        self.port_du_serveur_maitre = port_du_serveur_maitre
         self.socket_esclave = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     def lancer_serveur_esclave(self):
@@ -57,7 +56,7 @@ class ServeurEsclave:
 
             _, extension = os.path.splitext(nom_fichier)
 
-            resultat = self.résultat_execution(chemin_fichier, extension)
+            self.résultat_execution(chemin_fichier, extension)
 
         except Exception as e:
             print(f"[-] Erreur lors de l'enregistrement du fichier: {e}")
@@ -142,6 +141,12 @@ class ServeurEsclave:
             return result.stdout if result.returncode == 0 else result.stderr
         except Exception as e:
             return f"Erreur d'exécution Java : {e}"
+
+
+
+
+
+
 
 if __name__ == "__main__":
     serveur = ServeurEsclave(port_esclave=1111)

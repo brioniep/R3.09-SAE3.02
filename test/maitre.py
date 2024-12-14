@@ -1,12 +1,16 @@
 import socket
+import os
 import threading
 
 class ServerMaitre:
-    def __init__(self, host='0.0.0.0', port=1234):
+    def __init__(self, host='0.0.0.0', port=1234, ):
         self.host = host
         self.port = port
 
     def start(self):
+        """
+        Démarre le serveur maître, écoute les connexions des clients et gère leur traitement.
+        """
         self.socket_serveur = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket_serveur.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.socket_serveur.bind((self.host, self.port))
@@ -24,12 +28,18 @@ class ServerMaitre:
             self.socket_serveur.close()
             print("Socket serveur fermé.")
 
+
+
     def gestion_client(self, socket_client, adresse_client):
+        """
+        Gère la connexion d'un client et affiche le contenu du fichier reçu dans le terminal.
+        """
         id_client = threading.get_ident()
         print(f"[+] Client {adresse_client} connecté.")
 
         try:
             while True:
+                # Récupérer le nom du fichier
                 nom_fichier = socket_client.recv(1024).decode('utf-8').strip()
                 if not nom_fichier:
                     break
@@ -41,24 +51,36 @@ class ServerMaitre:
                         break
                     contenu_fichier += donnees
 
+                    # Vérifier si le signal de fin est reçu
                     if b"\x00" in donnees:
                         break
 
+                # Supprimer le caractère de fin s'il est présent
                 if contenu_fichier.endswith(b'\x00'):
                     contenu_fichier = contenu_fichier[:-1]
 
+                # Afficher le contenu du fichier
                 try:
+                    # Essayer de décoder comme du texte
                     contenu_fichier_str = contenu_fichier.decode('utf-8')
                 except UnicodeDecodeError:
+                    # Si ce n'est pas du texte, afficher en binaire
                     contenu_fichier_str = contenu_fichier
 
+                # Créer une liste avec id_client, nom_fichier et contenu_fichier
                 fichier_info = [id_client, nom_fichier, contenu_fichier_str]
                 print(f"[Client-{id_client}] Liste créée : {fichier_info}")
 
-                self.envoie_server1(fichier_info)
+                # Envoyer le fichier au serveur esclave 1
+                self.envoie_server1( fichier_info)
 
         except Exception as e:
             print(f"[-] Erreur avec le client-{id_client}: {e}")
+
+
+
+
+
 
     def envoie_server1(self, fichier_info):
         try:
@@ -68,19 +90,18 @@ class ServerMaitre:
             print("[SERVEUR] Connexion établie avec le serveur esclave 1.")
         except Exception as e:
             print(f"[-] Erreur de connexion au serveur esclave 1: {e}")
+            return
 
         try:
-            socket_esclave.sendall(fichier_info[1].encode('utf-8') + b'\n')
-            print(f"[SERVEUR] Nom du fichier envoyé : {fichier_info[1]}")
-
-            if isinstance(fichier_info[2], str):
-                socket_esclave.sendall(fichier_info[2].encode('utf-8') + b'\0')
-            else:
-                socket_esclave.sendall(fichier_info[2] + b'\0')
-                print(f"[SERVEUR] Contenu du fichier envoyé au serveur esclave 1.")
-
+            # Convertir la liste en chaîne formatée
+            donnees = f"{fichier_info[0]}|{fichier_info[1]}|{fichier_info[2]}"
+            socket_esclave.sendall(donnees.encode('utf-8'))
+            print(f"[SERVEUR] Liste fichier_info envoyée : {fichier_info}")
         except Exception as e:
             print(f"[-] Erreur lors de l'envoi au serveur esclave 1: {e}")
+
+
+
 
 if __name__ == "__main__":
     server = ServerMaitre()
