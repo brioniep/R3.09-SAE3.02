@@ -69,17 +69,28 @@ class MaFenetre(QWidget):
         if self.est_connecte:
             self.historique_logs.append("Déjà connecté au serveur.")
             return
+
         try:
             self.socket_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.socket_client.connect((ip, port))
             self.est_connecte = True
+
+            # Démarrage du thread de réception
+            self.recepteur_thread = QThread(self)
+            self.recepteur_thread.run = self.recevoir_donnees  # Overriding the run method
+            self.recepteur_thread.start()
+
             self.historique_logs.append(f"Connexion réussie à {ip}:{port}")
+
         except socket.error as e:
             self.socket_client = None
             self.est_connecte = False
             self.historique_logs.append(f"Erreur de connexion : {e}")
             print(f"Erreur de connexion : {e}")
 
+
+
+            
     def deconnexion_du_serveur(self):
         if self.est_connecte:
             try:
@@ -87,6 +98,9 @@ class MaFenetre(QWidget):
                 self.est_connecte = False
                 self.historique_logs.append("Déconnexion réussie.")
                 print("Déconnexion réussie.")
+                if self.recepteur_thread:
+                    self.recepteur_thread.quit()
+                    self.recepteur_thread = None
             except Exception as e:
                 self.historique_logs.append(f"Erreur lors de la déconnexion : {e}")
                 print(f"Erreur lors de la déconnexion : {e}")
@@ -141,6 +155,32 @@ class MaFenetre(QWidget):
         except Exception as e:
             self.historique_logs.append(f"Erreur lors de l'envoi du fichier : {e}")
 
+
+
+
+
+
+    def recevoir_donnees(self):
+
+        while self.est_connecte:
+            try:
+                # Réception des données
+                donnees = self.socket_client.recv(4096).decode('utf-8')
+                if donnees:
+                    # Une fois les données reçues, on les affiche dans la zone de texte
+                    self.afficher_message(donnees)
+                else:
+                    break  # La connexion a été fermée par le serveur
+            except Exception as e:
+                print(f"Erreur de réception : {e}")
+                break
+            
+
+
+    def afficher_message(self, message):
+
+        self.fichiers_recus.append(message)
+        self.historique_logs.append(f"Message reçu du serveur : {message}")
 
 
 if __name__ == "__main__":
