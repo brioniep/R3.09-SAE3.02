@@ -1,9 +1,4 @@
-import socket
-import threading
-
-import socket
-import os
-import threading
+import socket, threading, subprocess, time
 
 class ServerMaitre:
     def __init__(self, host='0.0.0.0', port=1234, host_esclave='0.0.0.0', port_esclave=5555):
@@ -59,21 +54,13 @@ class ServerMaitre:
             self.socket_serveur_esclave.close()
             print("Socket serveur esclave fermé.")
 
-
-
-
-
-
-
-
-
-
-
-
     def gestion_client(self, socket_client, adresse_client):
         id_client = threading.get_ident()
         self.clients[id_client] = socket_client  # Stockage du client
         print(f"[+] Client {adresse_client} connecté avec ID {id_client}.")
+
+        # Récupérer les informations sur l'utilisation de la mémoire des serveurs esclaves
+        sae_server_esclave1_1, sae_server_esclave2_1, sae_server_esclave3_1, sae_server_esclave4_1 = self.ram_conteneur()
 
         try:
             while True:
@@ -98,8 +85,8 @@ class ServerMaitre:
                 fichier_info = [id_client, nom_fichier, contenu_fichier_str]
                 print(f"[Client-{id_client}] Liste créée : {fichier_info}")
 
-                
-                self.choix_esclave(fichier_info)
+                # Passer les informations de mémoire à la fonction choix_esclave
+                self.choix_esclave(fichier_info, sae_server_esclave1_1, sae_server_esclave2_1, sae_server_esclave3_1, sae_server_esclave4_1)
 
         except Exception as e:
             print(f"[-] Erreur avec le client-{id_client}: {e}")
@@ -113,30 +100,94 @@ class ServerMaitre:
 
 
 
+    def ram_conteneur(self):
+        sae_server_esclave1_1 = sae_server_esclave2_1 = sae_server_esclave3_1 = sae_server_esclave4_1 = 0
+        while True:
+            try:
+                result = subprocess.run(['docker', 'stats', '--no-stream', '--format', '{{.Name}}\t{{.MemPerc}}'], stdout=subprocess.PIPE)
+                containers_stats = result.stdout.decode('utf-8').strip().split('\n')
+                
+                mem_usage = {}
+                for line in containers_stats:
+                    name, mem_perc = line.split('\t')
+                    mem_usage[name] = mem_perc
+                
+                sae_server_esclave1_1 = int(float(mem_usage.get('sae-server-esclave1-1', '0').strip('%')))
+                sae_server_esclave2_1 = int(float(mem_usage.get('sae-server-esclave2-1', '0').strip('%')))
+                sae_server_esclave3_1 = int(float(mem_usage.get('sae-server-esclave3-1', '0').strip('%')))
+                sae_server_esclave4_1 = int(float(mem_usage.get('sae-server-esclave4-1', '0').strip('%')))
 
 
-    def choix_esclave(self, fichier_info):
+
+                return sae_server_esclave1_1, sae_server_esclave2_1, sae_server_esclave3_1, sae_server_esclave4_1
+            except Exception as e:
+                print(f"An error occurred: {e}")
+            time.sleep(5)
+
+
+
+
+
+    def choix_esclave(self,fichier_info, sae_server_esclave1_1, sae_server_esclave2_1, sae_server_esclave3_1, sae_server_esclave4_1):
 
         extention = fichier_info[1].split('.')[-1]
-        print(f"Extension du fichier : {extention}")
+
+
+
+        print(f"sae-server-esclave1-1: {sae_server_esclave1_1}")
+        print(f"sae-server-esclave2-1: {sae_server_esclave2_1}")
+        print(f"sae-server-esclave3-1: {sae_server_esclave3_1}")
+        print(f"sae-server-esclave4-1: {sae_server_esclave4_1}")
+
+
 
         if extention == "py":
-            self.envoie_server1(fichier_info)
+            if sae_server_esclave1_1 > 50:
+                self.envoie_server1(fichier_info)
+            elif sae_server_esclave2_1 > 50:
+                self.envoie_server2(fichier_info)
+            elif sae_server_esclave3_1 > 50:
+                self.envoie_server3(fichier_info)
+            elif sae_server_esclave4_1 > 50:
+                self.envoie_server4(fichier_info)
+            else:
+                self.envoie_server1(fichier_info)
+
         elif extention == "java":
-            self.envoie_server2(fichier_info)
-        elif extention == "c":
-            self.envoie_server3(fichier_info)
-        elif extention == "cpp":
-            self.envoie_server4(fichier_info)
-
+            if sae_server_esclave1_1 > 50:
+                self.envoie_server1(fichier_info)
+            elif sae_server_esclave2_1 > 50:
+                self.envoie_server2(fichier_info)
+            elif sae_server_esclave3_1 > 50:
+                self.envoie_server3(fichier_info)
+            elif sae_server_esclave4_1 > 50:
+                self.envoie_server4(fichier_info)
+            else:
+                self.envoie_server2(fichier_info)
         
+        elif extention == "c":
+            if sae_server_esclave1_1 > 50:
+                self.envoie_server1(fichier_info)
+            elif sae_server_esclave2_1 > 50:
+                self.envoie_server2(fichier_info)
+            elif sae_server_esclave3_1 > 50:
+                self.envoie_server3(fichier_info)
+            elif sae_server_esclave4_1 > 50:
+                self.envoie_server4(fichier_info)
+            else:
+                self.envoie_server3(fichier_info)
 
-
-
-
-
-
-
+        elif extention == "cpp":
+            if sae_server_esclave1_1 > 50:
+                self.envoie_server1(fichier_info)
+            elif sae_server_esclave2_1 > 50:
+                self.envoie_server2(fichier_info)
+            elif sae_server_esclave3_1 > 50:
+                self.envoie_server3(fichier_info)
+            elif sae_server_esclave4_1 > 50:
+                self.envoie_server4(fichier_info)
+            else:
+                self.envoie_server4(fichier_info)
 
 
 
@@ -163,10 +214,6 @@ class ServerMaitre:
             print(f"[SERVEUR] Liste fichier_info envoyée : {fichier_info}")
         except Exception as e:
             print(f"[-] Erreur lors de l'envoi au serveur esclave 1: {e}")
-
-
-
-
 
     def envoie_server2(self, fichier_info):
         try:
@@ -223,26 +270,6 @@ class ServerMaitre:
             print(f"[-] Erreur lors de l'envoi au serveur esclave 4: {e}")
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     def reception_srv_esclave(self,address_esclave,socket_esclave):
         print(f"[+] SRV {address_esclave} connecté.")
 
@@ -287,49 +314,9 @@ class ServerMaitre:
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 if __name__ == "__main__":
     server = ServerMaitre()
     t1 = threading.Thread(target=server.start_srv_client)
     t2 = threading.Thread(target=server.start_srv_esclave)
     t1.start()
     t2.start()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
