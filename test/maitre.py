@@ -19,6 +19,10 @@ class ServerMaitre:
         self.port = port
         self.host_esclave = host_esclave
         self.port_esclave = port_esclave
+        
+        # Initialisation des clients connectés
+        self.clients = {}
+
 
     def start_srv_client(self):
         """
@@ -75,15 +79,12 @@ class ServerMaitre:
 
 
     def gestion_client(self, socket_client, adresse_client):
-        """
-        Gère la connexion d'un client et affiche le contenu du fichier reçu dans le terminal.
-        """
         id_client = threading.get_ident()
-        print(f"[+] Client {adresse_client} connecté.")
+        self.clients[id_client] = socket_client  # Stockage du client
+        print(f"[+] Client {adresse_client} connecté avec ID {id_client}.")
 
         try:
             while True:
-                # Récupérer le nom du fichier
                 nom_fichier = socket_client.recv(1024).decode('utf-8').strip()
                 if not nom_fichier:
                     break
@@ -94,32 +95,25 @@ class ServerMaitre:
                     if not donnees:
                         break
                     contenu_fichier += donnees
-
-                    # Vérifier si le signal de fin est reçu
                     if b"\x00" in donnees:
                         break
 
-                # Supprimer le caractère de fin s'il est présent
                 if contenu_fichier.endswith(b'\x00'):
                     contenu_fichier = contenu_fichier[:-1]
 
-                # Afficher le contenu du fichier
-                try:
-                    # Essayer de décoder comme du texte
-                    contenu_fichier_str = contenu_fichier.decode('utf-8')
-                except UnicodeDecodeError:
-                    # Si ce n'est pas du texte, afficher en binaire
-                    contenu_fichier_str = contenu_fichier
+                contenu_fichier_str = contenu_fichier.decode('utf-8', errors='replace')
 
-                # Créer une liste avec id_client, nom_fichier et contenu_fichier
                 fichier_info = [id_client, nom_fichier, contenu_fichier_str]
                 print(f"[Client-{id_client}] Liste créée : {fichier_info}")
-
-                # Envoyer le fichier au serveur esclave 1
-                self.envoie_server1( fichier_info)
+                self.envoie_server1(fichier_info)
 
         except Exception as e:
             print(f"[-] Erreur avec le client-{id_client}: {e}")
+        finally:
+            del self.clients[id_client]  # Supprimer le client après déconnexion
+            socket_client.close()
+            print(f"[-] Client {id_client} déconnecté.")
+
 
 
 
@@ -181,9 +175,22 @@ class ServerMaitre:
 
 
 
-    def envoie_client(self,):
-        print("Envoie au client")
-        pass
+    def envoie_client(self, fichier_info):
+        id_client = int(fichier_info[0])
+        contenu_fichier = fichier_info[2]
+        print(f"Envoie au client {id_client} le contenu du fichier")
+
+        # Trouver le socket du client correspondant à l'id_client
+        socket_client = self.clients.get(id_client)
+        if not socket_client:
+            print(f"[-] Client avec ID {id_client} non trouvé.")
+            return
+
+        try:
+            socket_client.sendall(contenu_fichier.encode('utf-8'))
+            print(f"[SERVEUR] Contenu envoyé au client {id_client}")
+        except Exception as e:
+            print(f"[-] Erreur lors de l'envoi au client {id_client}: {e}")
 
 
 
