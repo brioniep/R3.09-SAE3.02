@@ -1,0 +1,22 @@
+# Utiliser l'image de base Python
+FROM python:3.9-slim
+
+# Définir le répertoire de travail
+WORKDIR /app
+
+# Installer les dépendances nécessaires
+RUN apt-get update && apt-get install -y \
+    gcc g++ openjdk-17-jdk && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Créer les répertoires nécessaires dans le conteneur
+RUN mkdir -p /app/file-attente /app/liste-envoie
+
+# Copier les fichiers dans le conteneur
+COPY server.py .
+
+# Changer les permissions pour permettre l'écriture
+RUN chmod -R 777 /app/file-attente /app/liste-envoie
+
+# Commande de lancement
+CMD ["python3", "server.py"]

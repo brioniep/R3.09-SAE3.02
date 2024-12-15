@@ -116,7 +116,7 @@ class ServerMaitre:
         try:
             print("[SERVEUR] Tentative de connexion au serveur esclave 1...")
             socket_esclave = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            socket_esclave.connect(('localhost', 1111))
+            socket_esclave.connect(('172.18.0.2', 1111))
             print("[SERVEUR] Connexion établie avec le serveur esclave 1.")
         except Exception as e:
             print(f"[-] Erreur de connexion au serveur esclave 1: {e}")
