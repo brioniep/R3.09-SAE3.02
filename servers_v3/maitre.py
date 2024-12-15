@@ -97,7 +97,9 @@ class ServerMaitre:
 
                 fichier_info = [id_client, nom_fichier, contenu_fichier_str]
                 print(f"[Client-{id_client}] Liste créée : {fichier_info}")
-                self.envoie_server1(fichier_info)
+
+                
+                self.choix_esclave(fichier_info)
 
         except Exception as e:
             print(f"[-] Erreur avec le client-{id_client}: {e}")
@@ -105,6 +107,38 @@ class ServerMaitre:
             del self.clients[id_client]  # Supprimer le client après déconnexion
             socket_client.close()
             print(f"[-] Client {id_client} déconnecté.")
+
+
+
+
+
+
+
+
+    def choix_esclave(self, fichier_info):
+
+        extention = fichier_info[1].split('.')[-1]
+        print(f"Extension du fichier : {extention}")
+
+        if extention == "py":
+            self.envoie_server1(fichier_info)
+        elif extention == "java":
+            self.envoie_server2(fichier_info)
+        elif extention == "c":
+            self.envoie_server3(fichier_info)
+        elif extention == "cpp":
+            self.envoie_server4(fichier_info)
+
+        
+
+
+
+
+
+
+
+
+
 
 
 
@@ -129,6 +163,79 @@ class ServerMaitre:
             print(f"[SERVEUR] Liste fichier_info envoyée : {fichier_info}")
         except Exception as e:
             print(f"[-] Erreur lors de l'envoi au serveur esclave 1: {e}")
+
+
+
+
+
+    def envoie_server2(self, fichier_info):
+        try:
+            print("[SERVEUR] Tentative de connexion au serveur esclave 2...")
+            socket_esclave = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            socket_esclave.connect(('172.18.0.3', 2222))
+            print("[SERVEUR] Connexion établie avec le serveur esclave 2.")
+        except Exception as e:
+            print(f"[-] Erreur de connexion au serveur esclave 2: {e}")
+            return
+
+        try:
+            # Convertir la liste en chaîne formatée
+            donnees = f"{fichier_info[0]}|{fichier_info[1]}|{fichier_info[2]}"
+            socket_esclave.sendall(donnees.encode('utf-8'))
+            print(f"[SERVEUR] Liste fichier_info envoyée : {fichier_info}")
+        except Exception as e:
+            print(f"[-] Erreur lors de l'envoi au serveur esclave 2: {e}")
+
+    def envoie_server3(self, fichier_info):
+        try:
+            print("[SERVEUR] Tentative de connexion au serveur esclave 3...")
+            socket_esclave = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            socket_esclave.connect(('172.18.0.4', 3333))
+            print("[SERVEUR] Connexion établie avec le serveur esclave 3.")
+        except Exception as e:
+            print(f"[-] Erreur de connexion au serveur esclave 3: {e}")
+            return
+
+        try:
+            # Convertir la liste en chaîne formatée
+            donnees = f"{fichier_info[0]}|{fichier_info[1]}|{fichier_info[2]}"
+            socket_esclave.sendall(donnees.encode('utf-8'))
+            print(f"[SERVEUR] Liste fichier_info envoyée : {fichier_info}")
+        except Exception as e:
+            print(f"[-] Erreur lors de l'envoi au serveur esclave 3: {e}")
+
+    def envoie_server4(self, fichier_info):
+        try:
+            print("[SERVEUR] Tentative de connexion au serveur esclave 4...")
+            socket_esclave = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            socket_esclave.connect(('172.18.0.5', 4444))
+            print("[SERVEUR] Connexion établie avec le serveur esclave 4.")
+        except Exception as e:
+            print(f"[-] Erreur de connexion au serveur esclave 4: {e}")
+            return
+
+        try:
+            # Convertir la liste en chaîne formatée
+            donnees = f"{fichier_info[0]}|{fichier_info[1]}|{fichier_info[2]}"
+            socket_esclave.sendall(donnees.encode('utf-8'))
+            print(f"[SERVEUR] Liste fichier_info envoyée : {fichier_info}")
+        except Exception as e:
+            print(f"[-] Erreur lors de l'envoi au serveur esclave 4: {e}")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -161,12 +268,6 @@ class ServerMaitre:
         
         self.envoie_client(fichier_info)
 
-
-
-
-
-
-
     def envoie_client(self, fichier_info):
         id_client = int(fichier_info[0])
         contenu_fichier = fichier_info[2]
@@ -189,9 +290,46 @@ class ServerMaitre:
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 if __name__ == "__main__":
     server = ServerMaitre()
     t1 = threading.Thread(target=server.start_srv_client)
     t2 = threading.Thread(target=server.start_srv_esclave)
     t1.start()
     t2.start()
+
+
+
+
+
+
+
+
+
+
+
+
+
+

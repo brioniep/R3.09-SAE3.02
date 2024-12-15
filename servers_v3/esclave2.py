@@ -192,7 +192,7 @@ class ServeurEsclave:
 
 
 if __name__ == "__main__":
-    serveur = ServeurEsclave(port_esclave=1111)
+    serveur = ServeurEsclave()
     try:
         serveur.lancer_serveur_esclave()
     except KeyboardInterrupt:
