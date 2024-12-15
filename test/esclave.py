@@ -61,10 +61,13 @@ class ServeurEsclave:
         except Exception as e:
             print(f"[-] Erreur lors de l'enregistrement du fichier: {e}")
 
+
+
+
+
     def résultat_execution(self, fichier_path, extension):
         try:
             result = ""
-            
             print(f"Exécution du fichier avec extension {extension}: {fichier_path}")
 
             if extension == ".py":
@@ -79,8 +82,16 @@ class ServeurEsclave:
                 result = "Type de fichier non pris en charge."
 
             print(f"Résultat de l'exécution: {result}")
+
+            # Extraire les informations nécessaires à partir du chemin du fichier
+            id_client = os.path.basename(os.path.dirname(fichier_path))
+            nom_fichier = os.path.basename(fichier_path)
+
+            self.envoie_srv_maitre(id_client, nom_fichier, result)
+            self.nettoyer_fichier(fichier_path)
+
             return result
-            
+
         except Exception as e:
             print(f"[-] Erreur lors de l'exécution : {e}")
             return f"Erreur : {e}"
@@ -141,6 +152,38 @@ class ServeurEsclave:
             return result.stdout if result.returncode == 0 else result.stderr
         except Exception as e:
             return f"Erreur d'exécution Java : {e}"
+
+
+
+
+
+
+    def envoie_srv_maitre(self, id_client, nom_fichier, resultat_execution):
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.connect(('localhost', 5555))
+                message = f"{id_client}|{nom_fichier}|{resultat_execution}"
+                s.sendall(message.encode('utf-8'))
+                print(f"Message envoyé au serveur maître: {message}")
+        except Exception as e:
+            print(f"[-] Erreur lors de l'envoi au serveur maître: {e}")
+
+
+
+
+
+    def nettoyer_fichier(self, fichier_path):
+        try:
+            dossier_client = os.path.dirname(fichier_path)
+            if os.path.exists(dossier_client):
+                subprocess.run(['rm', '-rf', dossier_client])
+                print(f"Dossier supprimé : {dossier_client}")
+            else:
+                print(f"Le dossier {dossier_client} n'existe pas.")
+        except Exception as e:
+            print(f"[-] Erreur lors de la suppression du dossier : {e}")
+
+
 
 
 
