@@ -1,13 +1,26 @@
 import socket
+import threading
+
+
+
+
+
+
+
+
+
+import socket
 import os
 import threading
 
 class ServerMaitre:
-    def __init__(self, host='0.0.0.0', port=1234, ):
+    def __init__(self, host='0.0.0.0', port=1234, host_esclave='0.0.0.0', port_esclave=5555):
         self.host = host
         self.port = port
+        self.host_esclave = host_esclave
+        self.port_esclave = port_esclave
 
-    def start(self):
+    def start_srv_client(self):
         """
         Démarre le serveur maître, écoute les connexions des clients et gère leur traitement.
         """
@@ -27,6 +40,37 @@ class ServerMaitre:
         finally:
             self.socket_serveur.close()
             print("Socket serveur fermé.")
+
+
+
+    def start_srv_esclave(self):
+        self.socket_serveur_esclave = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket_serveur_esclave.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.socket_serveur_esclave.bind((self.host_esclave, self.port_esclave))
+        self.socket_serveur_esclave.listen(5)
+        print("[SERVEUR] En attente de connexions d'un esclave ...")
+
+        try:
+            while True:
+                socket_esclave, adresse_esclave = self.socket_serveur_esclave.accept()
+                print(f"[+] Connexion acceptée de l'esclave : {adresse_esclave}")
+
+                threading.Thread(target=self.reception_srv_esclave, args=(adresse_esclave, socket_esclave)).start()
+
+        except KeyboardInterrupt:
+            print("Arrêt du serveur esclave...")
+        finally:
+            self.socket_serveur_esclave.close()
+            print("Socket serveur esclave fermé.")
+
+
+
+
+
+
+
+
+
 
 
 
@@ -103,6 +147,52 @@ class ServerMaitre:
 
 
 
+
+
+
+    def reception_srv_esclave(self,address_esclave,socket_esclave):
+        print(f"[+] SRV {address_esclave} connecté.")
+
+        try:
+
+            donnees = socket_esclave.recv(4096).decode('utf-8')
+            if not donnees:
+                print("Aucune donnée reçue.")
+                return
+            
+            fichier_info = donnees.split('|', 2)
+            if len(fichier_info) != 3:
+                print("Données reçues incorrectes.")
+                return
+            
+            id_client, nom_fichier, contenu_fichier = fichier_info
+            print(f"[RECEPTION] ID Client: {id_client}, Nom du fichier: {nom_fichier}")
+            print(f"[RECEPTION] Contenu du résultat du fichier:\n{contenu_fichier}")
+
+        except Exception as e:
+            print(f"[-] Erreur lors de la réception du fichier executé: {e}")
+
+        
+        self.envoie_client(fichier_info)
+
+
+
+
+
+
+
+    def envoie_client(self,):
+        print("Envoie au client")
+        pass
+
+
+
+
+
+
 if __name__ == "__main__":
     server = ServerMaitre()
-    server.start()
+    t1 = threading.Thread(target=server.start_srv_client)
+    t2 = threading.Thread(target=server.start_srv_esclave)
+    t1.start()
+    t2.start()
