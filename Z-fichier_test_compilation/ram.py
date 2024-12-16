@@ -1,5 +1,5 @@
 import time
-
+import threading
 
 def consume_ram(target_ram_mb=1000):
     """
@@ -26,6 +26,10 @@ def consume_ram(target_ram_mb=1000):
         print("Libération de la mémoire...")
         del large_data  # Libérer la mémoire après utilisation
 
+def stop_script():
+    print("Temps écoulé. Arrêt du script.")
+    sys.exit(0)
+
 if __name__ == "__main__":
     import sys
     
@@ -39,5 +43,9 @@ if __name__ == "__main__":
     else:
         # Par défaut, consomme 1000 Mo
         target_ram_mb = 1000
+    
+    # Démarrer un timer pour arrêter le script après 2 minutes (120 secondes)
+    timer = threading.Timer(120, stop_script)
+    timer.start()
     
     consume_ram(target_ram_mb)
