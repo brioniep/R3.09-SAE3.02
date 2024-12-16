@@ -9,7 +9,8 @@ while True:
         mem_usage = {}
         for line in containers_stats:
             name, mem_perc = line.split('\t')
-            mem_usage[name] = mem_perc
+            # Supprimer le symbole % à la fin
+            mem_usage[name] = mem_perc.rstrip('%')
         
         sae_server_esclave1_1 = mem_usage.get('sae-server-esclave1-1', 'N/A')
         sae_server_esclave2_1 = mem_usage.get('sae-server-esclave2-1', 'N/A')

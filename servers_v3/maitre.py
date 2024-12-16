@@ -110,12 +110,18 @@ class ServerMaitre:
                 mem_usage = {}
                 for line in containers_stats:
                     name, mem_perc = line.split('\t')
-                    mem_usage[name] = mem_perc
+                    # Supprimer le symbole % à la fin
+                    mem_usage[name] = float(mem_perc.rstrip('%'))
                 
-                sae_server_esclave1_1 = int(float(mem_usage.get('sae-server-esclave1-1', '0').strip('%')))
-                sae_server_esclave2_1 = int(float(mem_usage.get('sae-server-esclave2-1', '0').strip('%')))
-                sae_server_esclave3_1 = int(float(mem_usage.get('sae-server-esclave3-1', '0').strip('%')))
-                sae_server_esclave4_1 = int(float(mem_usage.get('sae-server-esclave4-1', '0').strip('%')))
+                sae_server_esclave1_1 = mem_usage.get('sae-server-esclave1-1', 'N/A')
+                sae_server_esclave2_1 = mem_usage.get('sae-server-esclave2-1', 'N/A')
+                sae_server_esclave3_1 = mem_usage.get('sae-server-esclave3-1', 'N/A')
+                sae_server_esclave4_1 = mem_usage.get('sae-server-esclave4-1', 'N/A')
+                
+                print(f"sae-server-esclave1-1: {sae_server_esclave1_1}")
+                print(f"sae-server-esclave2-1: {sae_server_esclave2_1}")
+                print(f"sae-server-esclave3-1: {sae_server_esclave3_1}")
+                print(f"sae-server-esclave4-1: {sae_server_esclave4_1}")
 
 
 
@@ -141,50 +147,68 @@ class ServerMaitre:
 
 
 
+    def choix_esclave(self, fichier_info, sae_server_esclave1_1, sae_server_esclave2_1, sae_server_esclave3_1, sae_server_esclave4_1):
+        extention = fichier_info[1].split('.')[-1]
+
+        # Affichage des valeurs RAM pour débogage
+        print(f"sae-server-esclave1-1: {sae_server_esclave1_1}")
+        print(f"sae-server-esclave2-1: {sae_server_esclave2_1}")
+        print(f"sae-server-esclave3-1: {sae_server_esclave3_1}")
+        print(f"sae-server-esclave4-1: {sae_server_esclave4_1}")
+
+        # Si l'extension est py, on envoie au premier serveur disponible en respectant les priorités
         if extention == "py":
-            if sae_server_esclave1_1 > 50:
+            if float(sae_server_esclave1_1) <= 50:
+                print("Envoie au serveur 1")
                 self.envoie_server1(fichier_info)
-            elif sae_server_esclave2_1 > 50:
+            elif float(sae_server_esclave2_1) <= 50:
+                print("Envoie au serveur 2")
                 self.envoie_server2(fichier_info)
-            elif sae_server_esclave3_1 > 50:
+            elif float(sae_server_esclave3_1) <= 50:
+                print("Envoie au serveur 3")
                 self.envoie_server3(fichier_info)
-            elif sae_server_esclave4_1 > 50:
+            elif float(sae_server_esclave4_1) <= 50:
+                print("Envoie au serveur 4")
                 self.envoie_server4(fichier_info)
             else:
+                print("Aucun serveur disponible, envoi au serveur 1")
                 self.envoie_server1(fichier_info)
 
+        # Si l'extension est java
         elif extention == "java":
-            if sae_server_esclave1_1 > 50:
+            if float(sae_server_esclave1_1) <= 50:
                 self.envoie_server1(fichier_info)
-            elif sae_server_esclave2_1 > 50:
+            elif float(sae_server_esclave2_1) <= 50:
                 self.envoie_server2(fichier_info)
-            elif sae_server_esclave3_1 > 50:
+            elif float(sae_server_esclave3_1) <= 50:
                 self.envoie_server3(fichier_info)
-            elif sae_server_esclave4_1 > 50:
+            elif float(sae_server_esclave4_1) <= 50:
                 self.envoie_server4(fichier_info)
             else:
                 self.envoie_server2(fichier_info)
-        
+
+        # Si l'extension est c
         elif extention == "c":
-            if sae_server_esclave1_1 > 50:
+            if float(sae_server_esclave1_1) <= 50:
                 self.envoie_server1(fichier_info)
-            elif sae_server_esclave2_1 > 50:
+            elif float(sae_server_esclave2_1) <= 50:
                 self.envoie_server2(fichier_info)
-            elif sae_server_esclave3_1 > 50:
+            elif float(sae_server_esclave3_1) <= 50:
                 self.envoie_server3(fichier_info)
-            elif sae_server_esclave4_1 > 50:
+            elif float(sae_server_esclave4_1) <= 50:
                 self.envoie_server4(fichier_info)
             else:
                 self.envoie_server3(fichier_info)
 
+        # Si l'extension est cpp
         elif extention == "cpp":
-            if sae_server_esclave1_1 > 50:
+            if float(sae_server_esclave1_1) <= 50:
                 self.envoie_server1(fichier_info)
-            elif sae_server_esclave2_1 > 50:
+            elif float(sae_server_esclave2_1) <= 50:
                 self.envoie_server2(fichier_info)
-            elif sae_server_esclave3_1 > 50:
+            elif float(sae_server_esclave3_1) <= 50:
                 self.envoie_server3(fichier_info)
-            elif sae_server_esclave4_1 > 50:
+            elif float(sae_server_esclave4_1) <= 50:
                 self.envoie_server4(fichier_info)
             else:
                 self.envoie_server4(fichier_info)
