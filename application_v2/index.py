@@ -67,7 +67,7 @@ class MaFenetre(QWidget):
         port = int(self.port_input.text())
 
         if self.est_connecte:
-            self.historique_logs.append("Déjà connecté au serveur.")
+            self.historique_logs.append("[-] Déjà connecté au serveur.")
             return
 
         try:
@@ -80,12 +80,12 @@ class MaFenetre(QWidget):
             self.recepteur_thread.run = self.recevoir_donnees  # Overriding the run method
             self.recepteur_thread.start()
 
-            self.historique_logs.append(f"Connexion réussie à {ip}:{port}")
+            self.historique_logs.append(f"[+] Connexion réussie à {ip}:{port}")
 
         except socket.error as e:
             self.socket_client = None
             self.est_connecte = False
-            self.historique_logs.append(f"Erreur de connexion : {e}")
+            self.historique_logs.append(f" [-] Erreur de connexion : {e}")
             print(f"Erreur de connexion : {e}")
 
 
@@ -96,17 +96,17 @@ class MaFenetre(QWidget):
             try:
                 self.socket_client.close()
                 self.est_connecte = False
-                self.historique_logs.append("Déconnexion réussie.")
+                self.historique_logs.append("[+] Déconnexion réussie.")
                 print("Déconnexion réussie.")
                 if self.recepteur_thread:
                     self.recepteur_thread.quit()
                     self.recepteur_thread = None
             except Exception as e:
-                self.historique_logs.append(f"Erreur lors de la déconnexion : {e}")
-                print(f"Erreur lors de la déconnexion : {e}")
+                self.historique_logs.append(f"[-] Erreur lors de la déconnexion : {e}")
+                print(f"[-] Erreur lors de la déconnexion : {e}")
         else:
-            self.historique_logs.append("Pas de connexion active.")
-            print("Pas de connexion active.")
+            self.historique_logs.append("[-] Pas de connexion active.")
+            print("[-] Pas de connexion active.")
 
 
 
@@ -149,7 +149,8 @@ class MaFenetre(QWidget):
                     print(f"Erreur lors de l'envoi du fichier : {e}")
                     return
 
-            self.historique_logs.append(f"Fichier '{chemin_fichier}' envoyé avec succès.")
+            fichier_nom = os.path.basename(chemin_fichier)
+            self.historique_logs.append(f"[+] Fichier '{fichier_nom}' envoyé avec succès.")
             self.chemin.clear()
 
         except Exception as e:
@@ -161,26 +162,37 @@ class MaFenetre(QWidget):
 
 
     def recevoir_donnees(self):
-
         while self.est_connecte:
             try:
-                # Réception des données
                 donnees = self.socket_client.recv(4096).decode('utf-8')
                 if donnees:
-                    # Une fois les données reçues, on les affiche dans la zone de texte
-                    self.afficher_message(donnees)
+                    # Séparer le nom du fichier et le contenu
+                    nom_fichier, contenu_fichier = donnees.split('|||', 1)
+                    self.afficher_message(nom_fichier, contenu_fichier)
                 else:
-                    break  # La connexion a été fermée par le serveur
+                    break
             except Exception as e:
                 print(f"Erreur de réception : {e}")
                 break
-            
 
 
-    def afficher_message(self, message):
+    def afficher_message(self, nom_fichier, contenu_fichier):
+        extention = os.path.splitext(nom_fichier)[1]
 
-        self.fichiers_recus.append(message)
-        self.historique_logs.append(f"Message reçu du serveur : {message}")
+        prompt = ""
+        if extention == ".py":
+            prompt = f"╔═[user@client:~/workspace] \n╚═══> $ python3 {nom_fichier}"
+        elif extention == ".c":
+            prompt = f"╔═[user@client:~/workspace] \n╚═══> $ gcc {nom_fichier} -o {nom_fichier.rsplit('.', 1)[0]}"
+        elif extention == ".cpp":
+            prompt = f"╔═[user@client:~/workspace] \n╚═══> $ g++ {nom_fichier} -o {nom_fichier.rsplit('.', 1)[0]}"
+        elif extention == ".java":
+            prompt = f"╔═[user@client:~/workspace] \n╚═══> $ javac {nom_fichier}"
+
+        # Stocker et afficher
+        self.fichiers_recus.append(prompt)
+        self.fichiers_recus.append(contenu_fichier)
+        self.historique_logs.append(f"[+] Fichier '{nom_fichier}' reçu avec succès : {nom_fichier}")
 
 
 if __name__ == "__main__":

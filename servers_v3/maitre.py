@@ -116,10 +116,6 @@ class ServerMaitre:
             sae_server_esclave3_1 = mem_usage.get('sae-server-esclave3-1', 'N/A')
             sae_server_esclave4_1 = mem_usage.get('sae-server-esclave4-1', 'N/A')
             
-            print(f"sae-server-esclave1-1: {sae_server_esclave1_1}")
-            print(f"sae-server-esclave2-1: {sae_server_esclave2_1}")
-            print(f"sae-server-esclave3-1: {sae_server_esclave3_1}")
-            print(f"sae-server-esclave4-1: {sae_server_esclave4_1}")
 
             return sae_server_esclave1_1, sae_server_esclave2_1, sae_server_esclave3_1, sae_server_esclave4_1
         except Exception as e:
@@ -131,12 +127,6 @@ class ServerMaitre:
 
         # Actualiser les informations de mémoire des serveurs esclaves
         sae_server_esclave1_1, sae_server_esclave2_1, sae_server_esclave3_1, sae_server_esclave4_1 = self.ram_conteneur()
-
-        print(f"sae-server-esclave1-1: {sae_server_esclave1_1}")
-        print(f"sae-server-esclave2-1: {sae_server_esclave2_1}")
-        print(f"sae-server-esclave3-1: {sae_server_esclave3_1}")
-        print(f"sae-server-esclave4-1: {sae_server_esclave4_1}")
-
 
 
         # Si l'extension est py, on envoie au premier serveur disponible en respectant les priorités
@@ -154,39 +144,39 @@ class ServerMaitre:
 
         # Si l'extension est java
         elif extention == "java":
-            if float(sae_server_esclave1_1) <= 50:
+            if float(sae_server_esclave2_1) <= 50:
                 self.envoie_server2(fichier_info)
-            elif float(sae_server_esclave2_1) <= 50:
-                self.envoie_server3(fichier_info)
             elif float(sae_server_esclave3_1) <= 50:
-                self.envoie_server4(fichier_info)
+                self.envoie_server3(fichier_info)
             elif float(sae_server_esclave4_1) <= 50:
+                self.envoie_server4(fichier_info)
+            elif float(sae_server_esclave1_1) <= 50:
                 self.envoie_server1(fichier_info)
             else:
                 self.envoie_server2(fichier_info)
 
         # Si l'extension est c
         elif extention == "c":
-            if float(sae_server_esclave1_1) <= 50:
+            if float(sae_server_esclave3_1) <= 50:
                 self.envoie_server3(fichier_info)
-            elif float(sae_server_esclave2_1) <= 50:
-                self.envoie_server4(fichier_info)
-            elif float(sae_server_esclave3_1) <= 50:
-                self.envoie_server1(fichier_info)
             elif float(sae_server_esclave4_1) <= 50:
+                self.envoie_server4(fichier_info)
+            elif float(sae_server_esclave1_1) <= 50:
+                self.envoie_server1(fichier_info)
+            elif float(sae_server_esclave2_1) <= 50:
                 self.envoie_server2(fichier_info)
             else:
                 self.envoie_server3(fichier_info)
 
         # Si l'extension est cpp
         elif extention == "cpp":
-            if float(sae_server_esclave1_1) <= 50:
+            if float(sae_server_esclave4_1) <= 50:
                 self.envoie_server4(fichier_info)
-            elif float(sae_server_esclave2_1) <= 50:
+            elif float(sae_server_esclave1_1) <= 50:
                 self.envoie_server1(fichier_info)
-            elif float(sae_server_esclave3_1) <= 50:
+            elif float(sae_server_esclave2_1) <= 50:
                 self.envoie_server2(fichier_info)
-            elif float(sae_server_esclave4_1) <= 50:
+            elif float(sae_server_esclave3_1) <= 50:
                 self.envoie_server3(fichier_info)
             else:
                 self.envoie_server4(fichier_info)
@@ -299,17 +289,19 @@ class ServerMaitre:
 
     def envoie_client(self, fichier_info):
         id_client = int(fichier_info[0])
+        nom_fichier = fichier_info[1]
         contenu_fichier = fichier_info[2]
-        print(f"Envoie au client {id_client} le contenu du fichier")
+        print(f"Envoie au client {id_client} le contenu du fichier et le nom du fichier")
 
-        # Trouver le socket du client correspondant à l'id_client
         socket_client = self.clients.get(id_client)
         if not socket_client:
             print(f"[-] Client avec ID {id_client} non trouvé.")
             return
 
         try:
-            socket_client.sendall(contenu_fichier.encode('utf-8'))
+            # Utiliser un délimiteur unique comme "|||"
+            donnees = f"{nom_fichier}|||{contenu_fichier}"
+            socket_client.sendall(donnees.encode('utf-8'))
             print(f"[SERVEUR] Contenu envoyé au client {id_client}")
         except Exception as e:
             print(f"[-] Erreur lors de l'envoi au client {id_client}: {e}")
