@@ -3,6 +3,7 @@ import socket
 import os
 from PyQt6.QtWidgets import *
 from PyQt6.QtCore import *
+import re
 
 class MaFenetre(QWidget):
     def __init__(self):
@@ -62,9 +63,23 @@ class MaFenetre(QWidget):
             self.deconnexion_du_serveur()
         self.close()
 
+
     def connexion_au_serveur(self):
         ip = self.ip_input.text()
-        port = int(self.port_input.text())
+        port = self.port_input.text()
+
+        # Vérification de l'adresse IP
+        ip_regex = re.compile(r"^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$")
+        if not ip_regex.match(ip):
+            QMessageBox.warning(self, "Erreur de syntaxe", "L'adresse IP est incorrecte.")
+            return
+
+        # Vérification du port
+        if not port.isdigit() or not (0 <= int(port) <= 65535):
+            QMessageBox.warning(self, "Erreur de syntaxe", "Le port est incorrect.")
+            return
+
+        port = int(port)
 
         if self.est_connecte:
             self.historique_logs.append("[-] Déjà connecté au serveur.")
@@ -87,6 +102,7 @@ class MaFenetre(QWidget):
             self.est_connecte = False
             self.historique_logs.append(f" [-] Erreur de connexion : {e}")
             print(f"Erreur de connexion : {e}")
+
 
 
 
