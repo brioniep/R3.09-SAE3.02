@@ -4,6 +4,7 @@ import os
 from PyQt6.QtWidgets import *
 from PyQt6.QtCore import *
 import re
+import time
 
 class MaFenetre(QWidget):
     def __init__(self):
@@ -24,8 +25,12 @@ class MaFenetre(QWidget):
         self.deconnecter = QPushButton("Déconnexion")
 
         self.selection_fichier = QPushButton("Sélectionner un fichier")
+        self.selection_fichier.setEnabled(False)
         self.telecharger = QPushButton("Envoyer")
+        self.telecharger.setEnabled(False)
+
         self.chemin = QLineEdit()
+        self.chemin.setReadOnly(True)
         self.fichiers_recus = QTextEdit()
         self.fichiers_recus.setReadOnly(True)
 
@@ -89,6 +94,8 @@ class MaFenetre(QWidget):
             self.socket_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.socket_client.connect((ip, port))
             self.est_connecte = True
+            self.selection_fichier.setEnabled(True)
+            self.telecharger.setEnabled(True)
 
             # Démarrage du thread de réception
             self.recepteur_thread = QThread(self)
@@ -97,14 +104,13 @@ class MaFenetre(QWidget):
 
             self.historique_logs.append(f"[+] Connexion réussie à {ip}:{port}")
 
-        except socket.error as e:
-            self.socket_client = None
-            self.est_connecte = False
-            self.historique_logs.append(f" [-] Erreur de connexion : {e}")
-            print(f"Erreur de connexion : {e}")
+        except ConnectionRefusedError:
+            self.historique_logs.append("[-] Connexion refusée. Nouvelle tentative dans 5 secondes.")
+            QTimer.singleShot(5000, self.reconnexion)
 
-
-
+    def reconnexion(self):
+        if not self.est_connecte:
+            self.connexion_au_serveur()
 
             
     def deconnexion_du_serveur(self):
@@ -112,6 +118,8 @@ class MaFenetre(QWidget):
             try:
                 self.socket_client.close()
                 self.est_connecte = False
+                self.selection_fichier.setEnabled(False)
+                self.telecharger.setEnabled(False)
                 self.historique_logs.append("[+] Déconnexion réussie.")
                 print("Déconnexion réussie.")
                 if self.recepteur_thread:
