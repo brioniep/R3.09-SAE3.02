@@ -5,6 +5,7 @@ from PyQt6.QtWidgets import *
 from PyQt6.QtCore import *
 import re
 import time
+from style_index import apply_stylesheet  # Import the apply_stylesheet function
 
 class MaFenetre(QWidget):
     def __init__(self):
@@ -68,7 +69,6 @@ class MaFenetre(QWidget):
             self.deconnexion_du_serveur()
         self.close()
 
-
     def connexion_au_serveur(self):
         ip = self.ip_input.text()
         port = self.port_input.text()
@@ -87,7 +87,7 @@ class MaFenetre(QWidget):
         port = int(port)
 
         if self.est_connecte:
-            self.historique_logs.append("[-] Déjà connecté au serveur.")
+            self.historique_logs.append("<span style='color: red;'>[-]</span> Déjà connecté au serveur.")
             return
 
         try:
@@ -102,17 +102,12 @@ class MaFenetre(QWidget):
             self.recepteur_thread.run = self.recevoir_donnees  # Overriding the run method
             self.recepteur_thread.start()
 
-            self.historique_logs.append(f"[+] Connexion réussie à {ip}:{port}")
+            self.historique_logs.append(f"<span style='color: green;'>[+]</span>Connexion réussie à {ip}:{port}")
 
-        except ConnectionRefusedError:
-            self.historique_logs.append("[-] Connexion refusée. Nouvelle tentative dans 5 secondes.")
-            QTimer.singleShot(5000, self.reconnexion)
+        except Exception as e:
+            self.historique_logs.append(f"<span style='color: red;'>[-]</span> Erreur lors de la connexion : {e}")
+            print(f"[-] Erreur lors de la connexion : {e}")
 
-    def reconnexion(self):
-        if not self.est_connecte:
-            self.connexion_au_serveur()
-
-            
     def deconnexion_du_serveur(self):
         if self.est_connecte:
             try:
@@ -120,20 +115,16 @@ class MaFenetre(QWidget):
                 self.est_connecte = False
                 self.selection_fichier.setEnabled(False)
                 self.telecharger.setEnabled(False)
-                self.historique_logs.append("[+] Déconnexion réussie.")
+                self.historique_logs.append("<span style='color: green;'>[+]</span> Déconnexion réussie.")
                 print("Déconnexion réussie.")
                 if self.recepteur_thread:
                     self.recepteur_thread.quit()
                     self.recepteur_thread = None
             except Exception as e:
-                self.historique_logs.append(f"[-] Erreur lors de la déconnexion : {e}")
+                self.historique_logs.append(f"<span style='color: red;'>[-]</span> Erreur lors de la déconnexion : {e}")
                 print(f"[-] Erreur lors de la déconnexion : {e}")
         else:
-            self.historique_logs.append("[-] Pas de connexion active.")
-            print("[-] Pas de connexion active.")
-
-
-
+            self.historique_logs.append("<span style='color: red;'>[-]</span> Pas de connexion active.")
 
     def selectionner_fichier(self):
         fichier = QFileDialog.getOpenFileName(self, "Sélectionner un fichier", "", "Tous les fichiers (*);;Fichiers texte (*.txt);;Images (*.png *.xpm *.jpg)")
@@ -146,19 +137,14 @@ class MaFenetre(QWidget):
         
         self.chemin.setText(fichier[0])
 
-
-
-
-
-
     def envoyer_fichier(self):
         if not self.est_connecte:
-            self.historique_logs.append("Erreur : Pas de connexion au serveur.")
+            self.historique_logs.append("<span style='color: red;'>[-] Erreur : </span>Pas de connexion au serveur.")
             return
         chemin_fichier = self.chemin.text()
 
         if not chemin_fichier or not os.path.isfile(chemin_fichier):
-            self.historique_logs.append("Erreur : Aucun fichier valide sélectionné.")
+            self.historique_logs.append("<span style='color: red;'>[-] Erreur : </span>Aucun fichier valide sélectionné.")
             return
 
         try:
@@ -174,16 +160,11 @@ class MaFenetre(QWidget):
                     return
 
             fichier_nom = os.path.basename(chemin_fichier)
-            self.historique_logs.append(f"[+] Fichier '{fichier_nom}' envoyé avec succès.")
+            self.historique_logs.append(f"<span style='color: green;'>[+]</span> Fichier '{fichier_nom}' envoyé avec succès.")
             self.chemin.clear()
 
         except Exception as e:
-            self.historique_logs.append(f"Erreur lors de l'envoi du fichier : {e}")
-
-
-
-
-
+            self.historique_logs.append(f"<span style='color: red;'>Erreur</span> : lors de l'envoi du fichier : {e}")
 
     def recevoir_donnees(self):
         while self.est_connecte:
@@ -199,28 +180,28 @@ class MaFenetre(QWidget):
                 print(f"Erreur de réception : {e}")
                 break
 
-
     def afficher_message(self, nom_fichier, contenu_fichier):
         extention = os.path.splitext(nom_fichier)[1]
 
         prompt = ""
         if extention == ".py":
-            prompt = f"╔═[user@client:~/workspace] \n╚═══> $ python3 {nom_fichier}"
+            prompt = f"<span style='color: blue;'>╔═[</span>user@client:~/workspace]<br><span style='color: blue;'>╚═══> $</span> python3 {nom_fichier}"
         elif extention == ".c":
-            prompt = f"╔═[user@client:~/workspace] \n╚═══> $ gcc {nom_fichier} -o {nom_fichier.rsplit('.', 1)[0]}"
+            prompt = f"<span style='color: green;'>╔═[</span>user@client:~/workspace]<br><span style='color: green;'>╚═══> $</span> gcc {nom_fichier} -o {nom_fichier.rsplit('.', 1)[0]}"
         elif extention == ".cpp":
-            prompt = f"╔═[user@client:~/workspace] \n╚═══> $ g++ {nom_fichier} -o {nom_fichier.rsplit('.', 1)[0]}"
+            prompt = f"<span style='color: orange;'>╔═[</span>user@client:~/workspace]<br><span style='color: purple;'>╚═══> $</span> g++ {nom_fichier} -o {nom_fichier.rsplit('.', 1)[0]}"
         elif extention == ".java":
-            prompt = f"╔═[user@client:~/workspace] \n╚═══> $ javac {nom_fichier}"
+            prompt = f"<span style='color: red;'>╔═[</span>user@client:~/workspace]<br><span style='color: red;'>╚═══> $</span> javac {nom_fichier}"
+
 
         # Stocker et afficher
         self.fichiers_recus.append(prompt)
         self.fichiers_recus.append(contenu_fichier)
-        self.historique_logs.append(f"[+] Fichier '{nom_fichier}' reçu avec succès : {nom_fichier}")
-
+        self.historique_logs.append(f"<span style='color: green;'>[+]</span> Fichier '{nom_fichier}' reçu avec succès : {nom_fichier}")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+    apply_stylesheet(app)  # Apply the stylesheet
     fenetre = MaFenetre()
     fenetre.resize(800, 500)
     fenetre.show()

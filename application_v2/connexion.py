@@ -1,7 +1,7 @@
 import sys
 from PyQt6.QtWidgets import *
 from PyQt6.QtCore import *
-from server_choice import *
+from index import *
 
 class LoginWindow(QWidget):
     from style_connexion import apply_styles
@@ -32,7 +32,7 @@ class LoginWindow(QWidget):
         layout = QVBoxLayout()
         layout.setContentsMargins(80, 40, 80, 40)
         layout.setSpacing(25)
-        layout.setAlignment(Qt.AlignCenter)
+        layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         layout.addWidget(self.user_label)
         layout.addWidget(self.user_input)
@@ -66,7 +66,7 @@ class LoginWindow(QWidget):
         self.error_label.setVisible(False)
 
     def open_server_config(self):
-        self.server_config_window = ServerChoiceWindow()
+        self.server_config_window = MaFenetre()
         self.server_config_window.show()
         self.close()
 
@@ -74,6 +74,6 @@ class LoginWindow(QWidget):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    window = LoginWindow()
-    window.showFullScreen()
-    sys.exit(app.exec_())
+    window = LoginWindow()        
+    window.show()
+    sys.exit(app.exec())

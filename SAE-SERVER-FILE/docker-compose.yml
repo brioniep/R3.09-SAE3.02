@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  server-esclave1:
+    build:
+      context: ./server-esclave1
+    networks:
+      internal-net:
+        ipv4_address: 172.18.0.2
+    mem_limit: 1g
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./logs/server-esclave1:/var/log
+    environment:
+      - LOG_LEVEL=DEBUG
+
+  server-esclave2:
+    build:
+      context: ./server-esclave2
+    networks:
+      internal-net:
+        ipv4_address: 172.18.0.3
+    mem_limit: 1g
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./logs/server-esclave2:/var/log
+    environment:
+      - LOG_LEVEL=DEBUG
+
+  server-esclave3:
+    build:
+      context: ./server-esclave3
+    networks:
+      internal-net:
+        ipv4_address: 172.18.0.4
+    mem_limit: 1g
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./logs/server-esclave3:/var/log
+    environment:
+      - LOG_LEVEL=DEBUG
+
+  server-esclave4:
+    build:
+      context: ./server-esclave4
+    networks:
+      internal-net:
+        ipv4_address: 172.18.0.5
+    mem_limit: 1g
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./logs/server-esclave4:/var/log
+    environment:
+      - LOG_LEVEL=DEBUG
+
+networks:
+  internal-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: "172.18.0.0/16"
