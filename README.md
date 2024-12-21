@@ -102,11 +102,12 @@ Pour lancer le serveur maître, naviguez vers le répertoire approprié et exéc
 
 ```bash
 cd /chemin/vers/SERVER-FILE/server-maitre
-'''
+```
 
-'''bash
+```bash
 python3 server.py
 ```
+
 
 
 
