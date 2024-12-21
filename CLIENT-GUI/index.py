@@ -4,7 +4,6 @@ import os
 from PyQt6.QtWidgets import *
 from PyQt6.QtCore import *
 import re
-import time
 from style_index import apply_stylesheet 
 
 class MaFenetre(QWidget):

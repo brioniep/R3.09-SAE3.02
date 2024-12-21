@@ -9,53 +9,31 @@
 ## Installation des dépendances 🚀
 
 ### Docker 🐳
+
 Docker est une plateforme permettant de développer, livrer et exécuter des applications dans des conteneurs. Pour installer Docker sur Linux, suivez les étapes suivantes :
 
 1. Mettez à jour votre liste de paquets :
     ```bash
-    sudo apt-get update
+    sudo apt update -y && sudo apt upgrade -y
     ```
 
-2. Installez les paquets nécessaires pour permettre à `apt` d'utiliser un dépôt via HTTPS :
+2. Installez Docker :
     ```bash
-    sudo apt-get install apt-transport-https ca-certificates curl software-properties-common
-    ```
-
-3. Ajoutez la clé GPG officielle de Docker :
-    ```bash
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-    ```
-
-4. Ajoutez le dépôt Docker à vos sources APT :
-    ```bash
-    sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-    ```
-
-5. Mettez à jour la base de données des paquets avec les paquets Docker du dépôt ajouté :
-    ```bash
-    sudo apt-get update
-    ```
-
-6. Installez Docker :
-    ```bash
-    sudo apt-get install docker-ce
+    sudo apt install docker.io
     ```
 
 ### Docker Compose 📦
-Docker Compose est un outil pour définir et gérer des applications multi-conteneurs Docker. Pour l'installer, exécutez les commandes suivantes :
 
-1. Téléchargez la version stable de Docker Compose :
-    ```bash
-    sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-    ```
+Docker Compose est un outil pour définir et gérer des applications multi-conteneurs Docker. 
 
-2. Appliquez des permissions d'exécution au binaire :
-    ```bash
-    sudo chmod +x /usr/local/bin/docker-compose
-    ```
+Téléchargez la version stable de Docker Compose :
+```bash
+sudo apt install docker-compose
+```
 
 ### Python et librairies nécessaires 🐍
-Pour installer Python et les librairies nécessaires au projet, suivez ces étapes :
+
+Cette partie est à faire chez le client. Pour installer Python et les librairies nécessaires au projet, suivez ces étapes :
 
 1. Installez Python :
     ```bash
@@ -64,7 +42,7 @@ Pour installer Python et les librairies nécessaires au projet, suivez ces étap
 
 2. Installez les librairies nécessaires :
     ```bash
-    pip3 install -r requirements.txt
+    pip3 install pyqt6
     ```
 
 ## Mise en place des fichiers sur le serveur Linux 📂
@@ -89,3 +67,4 @@ Pour lancer l'application client, exécutez la commande suivante dans le répert
 ```bash
 python3 client.py
 ```
+
