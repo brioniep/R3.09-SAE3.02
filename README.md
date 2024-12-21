@@ -4,7 +4,17 @@
 
 Ce projet consiste en une application client-serveur utilisant Docker pour la gestion des conteneurs. Le dossier `SERVER-FILE` contient tous les fichiers nécessaires pour le serveur, tandis que le dossier `CLIENT-GUI` contient les fichiers pour l'application client.
 
-## Documentation d'installation
+## Structure du README
+
+Ce README est divisé en trois grandes parties :
+
+1. [Documentation d'installation](#documentation-dinstallation)
+2. [Documentation Utilisateur](#documentation-utilisateur)
+3. [Documentation Programmeur](#documentation-programmeur)
+
+
+
+# Documentation d'installation
 
 ### Table des matières
 
@@ -79,3 +89,35 @@ Ensuite, exécutez la commande suivante dans le serveur :
 docker-compose up --build
 ```
 
+## Lancement des serveurs esclaves 🚀
+
+Pour lancer les serveurs esclaves, utilisez la commande suivante dans le répertoire `SERVER-FILE` :
+```bash
+docker-compose up
+```
+
+## Lancement du serveur maître 🚀
+
+Pour lancer le serveur maître, naviguez vers le répertoire approprié et exécutez la commande suivante :
+
+```bash
+cd /chemin/vers/SERVER-FILE/server-maitre
+'''
+
+'''bash
+python3 server.py
+```
+
+
+
+
+
+
+
+# Documentation Utilisateur
+
+
+
+
+
+# Documentation Programmeur
