@@ -10,10 +10,6 @@ services:
     mem_limit: 1g
     stdin_open: true
     tty: true
-    volumes:
-      - ./logs/server-esclave1:/var/log
-    environment:
-      - LOG_LEVEL=DEBUG
 
   server-esclave2:
     build:
@@ -24,10 +20,6 @@ services:
     mem_limit: 1g
     stdin_open: true
     tty: true
-    volumes:
-      - ./logs/server-esclave2:/var/log
-    environment:
-      - LOG_LEVEL=DEBUG
 
   server-esclave3:
     build:
@@ -38,10 +30,6 @@ services:
     mem_limit: 1g
     stdin_open: true
     tty: true
-    volumes:
-      - ./logs/server-esclave3:/var/log
-    environment:
-      - LOG_LEVEL=DEBUG
 
   server-esclave4:
     build:
@@ -52,10 +40,6 @@ services:
     mem_limit: 1g
     stdin_open: true
     tty: true
-    volumes:
-      - ./logs/server-esclave4:/var/log
-    environment:
-      - LOG_LEVEL=DEBUG
 
 networks:
   internal-net:
