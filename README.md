@@ -1,10 +1,16 @@
-# Documentation d'installation
+# PROJET SAE-3.02 : Conception et Développement d’une Architecture Multi-Serveurs pour Compilation et Exécution de Programmes
 
-## Table des matières
+## Présentation du projet
+
+Ce projet consiste en une application client-serveur utilisant Docker pour la gestion des conteneurs. Le dossier `SERVER-FILE` contient tous les fichiers nécessaires pour le serveur, tandis que le dossier `CLIENT-GUI` contient les fichiers pour l'application client.
+
+## Documentation d'installation
+
+### Table des matières
+
 - [Installation des dépendances](#installation-des-dépendances)
 - [Mise en place des fichiers sur le serveur Linux](#mise-en-place-des-fichiers-sur-le-serveur-linux)
 - [Construction des conteneurs](#construction-des-conteneurs)
-- [Démarrage du client](#démarrage-du-client)
 
 ## Installation des dépendances 🚀
 
@@ -24,7 +30,7 @@ Docker est une plateforme permettant de développer, livrer et exécuter des app
 
 ### Docker Compose 📦
 
-Docker Compose est un outil pour définir et gérer des applications multi-conteneurs Docker. 
+Docker Compose est un outil pour définir et gérer des applications multi-conteneurs Docker.
 
 Téléchargez la version stable de Docker Compose :
 ```bash
@@ -49,22 +55,27 @@ Cette partie est à faire chez le client. Pour installer Python et les librairie
 
 Pour transférer les fichiers sur le serveur Linux, vous pouvez utiliser FileZilla. Téléchargez FileZilla depuis leur [site officiel](https://filezilla-project.org/).
 
-Assurez-vous que le serveur dispose de SSH pour pouvoir déposer les fichiers. Vous pouvez vérifier cela en essayant de vous connecter via SSH :
-```bash
-ssh user@server_ip
-```
+1. Installez ssh sur le serveur :
+    ```bash
+    sudo apt install openssh-server
+    ```
+
+2. Vérifiez l'état du service ssh :
+    ```bash
+    sudo systemctl status ssh
+    ```
+
+À la fin de ces installations, vous pouvez enfin utiliser FileZilla pour transférer les fichiers nécessaires sur le serveur Linux.
 
 ## Construction des conteneurs 🛠️
 
-Pour construire et démarrer les conteneurs, utilisez la commande suivante :
+Pour construire et démarrer les conteneurs, rendez-vous à la racine du dossier `SERVER-FILE` avec la commande suivante :
 ```bash
-docker-compose up --build
+cd /chemin/vers/SERVER-FILE
 ```
 
-## Démarrage du client 🚀
-
-Pour lancer l'application client, exécutez la commande suivante dans le répertoire du projet :
+Ensuite, exécutez la commande suivante dans le serveur :
 ```bash
-python3 client.py
+docker-compose up --build
 ```
 
