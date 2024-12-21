@@ -8,9 +8,9 @@ Ce projet consiste en une application client-serveur utilisant Docker pour la ge
 
 ### Table des matières
 
-- [Installation des dépendances](#installation-des-dépendances)
-- [Mise en place des fichiers sur le serveur Linux](#mise-en-place-des-fichiers-sur-le-serveur-linux)
-- [Construction des conteneurs](#construction-des-conteneurs)
+- [Installation des dépendances 🚀](#installation-des-dépendances-)
+- [Mise en place des fichiers sur le serveur Linux 📂](#mise-en-place-des-fichiers-sur-le-serveur-linux-)
+- [Construction des conteneurs 🛠️](#construction-des-conteneurs-)
 
 ## Installation des dépendances 🚀
 
