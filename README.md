@@ -27,12 +27,14 @@ Ce README est divisé en trois grandes parties :
 - [Installation des dépendances 🚀](#installation-des-dépendances-)
 - [Mise en place des fichiers sur le serveur Linux 📂](#mise-en-place-des-fichiers-sur-le-serveur-linux-)
 - [Construction des conteneurs 🛠️](#construction-des-conteneurs-)
+- [Lancement des serveurs 🚀](#lancement-des-serveurs-)
+- [Lancement du client](#lancement-du-client)
 
 ## Installation des dépendances 🚀
 
 ### Docker 🐳
 
-Docker est une plateforme permettant de développer, livrer et exécuter des applications dans des conteneurs. Pour installer Docker sur Linux, suivez les étapes suivantes :
+Docker est une plateforme permettant de développer, livrer et exécuter des applications dans des conteneurs. Pour installer Docker sur le serveur Linux, suivez les étapes suivantes :
 
 1. Mettez à jour votre liste de paquets :
     ```bash
@@ -48,7 +50,7 @@ Docker est une plateforme permettant de développer, livrer et exécuter des app
 
 Docker Compose est un outil pour définir et gérer des applications multi-conteneurs Docker.
 
-Téléchargez la version stable de Docker Compose :
+Téléchargez la version stable de Docker Compose sur le serveur :
 ```bash
 sudo apt install docker-compose
 ```
@@ -69,7 +71,7 @@ Cette partie est à faire chez le client. Pour installer Python et les librairie
 
 ## Mise en place des fichiers sur le serveur Linux 📂
 
-Pour transférer les fichiers sur le serveur Linux, vous pouvez utiliser FileZilla. Téléchargez FileZilla depuis leur [site officiel](https://filezilla-project.org/).
+- Pour transférer les fichiers sur le serveur Linux, vous pouvez utiliser FileZilla. Téléchargez FileZilla depuis leur [site officiel](https://filezilla-project.org/).
 
 1. Installez ssh sur le serveur :
     ```bash
@@ -85,15 +87,12 @@ Pour transférer les fichiers sur le serveur Linux, vous pouvez utiliser FileZil
 
 ## Construction des conteneurs 🛠️
 
-Pour construire et démarrer les conteneurs, rendez-vous à la racine du dossier `SERVER-FILE` avec la commande suivante :
-```bash
-cd /chemin/vers/SERVER-FILE
-```
-
-Ensuite, exécutez la commande suivante dans le serveur :
+Pour construire et démarrer les conteneurs, utilisez la commande suivante dans le répertoire `SERVER-FILE` 
 ```bash
 docker-compose up --build
 ```
+> ⚠️ **Avertissement** : cette commande peut mettre quelques minutes à s'exécuter dû à l'installation de 16 paquets.
+
 
 ## Lancement des serveurs 🚀
 
@@ -102,59 +101,64 @@ Pour lancer les serveurs esclaves, utilisez la commande suivante dans le répert
 docker-compose up
 ```
 
-Pour lancer le serveur maître, naviguez vers le répertoire approprié et exécutez la commande suivante :
-```bash
-cd /chemin/vers/SERVER-FILE/server-maitre
-```
+Pour lancer le serveur maître, utilisez la commande suivante dans le répertoire `SERVER-FILE/server-maitre/` :
 ```bash
 python3 server.py
 ```
 
 ## Lancement du client
-
-Pour lancer l'application client, naviguez vers le répertoire `CLIENT-GUI` et exécutez la commande suivante :
-```bash
-cd /chemin/vers/CLIENT-GUI
-```
+Pour lancer l'application client, utilisez la commande suivante adns le répertoire  `CLIENT-GUI` :
 ```bash
 python3 index.py
 ```
-## Lancement du client
-Pour lancer l'application client, suivez les étapes ci-dessous :
-
-1. Naviguez vers le répertoire `CLIENT-GUI` :
-    ```bash
-    cd /chemin/vers/CLIENT-GUI
-    ```
-2. Exécutez la commande suivante pour démarrer l'application client :
-    ```bash
-    python3 index.py
-    ```
 
 
 # Documentation Utilisateur
-# Documentation du Client
+
+## 
+
+### Table des matières
+
+- [Introduction](#introduction)
+- [Options de l'Application](#options-de-lapplication)
+
 
 ## Introduction
 Cette application client permet de se connecter à un serveur maître, d'envoyer des fichiers pour traitement et de recevoir les résultats. Elle est conçue pour être simple à utiliser et offre une interface graphique conviviale.
+Dans cette documentation utilisateur vous aurez une explication simple du projet, de ses fonctionnalités et fonctionnement. Si vous souhaitez avoir une analyse plus poussée du projet, je vous invite à vous rendre sur la [documentation développeur](#documentation-Développeur).
 
 
-### Options de l'Application
+## Options de l'Application
 
-- **Connexion au Serveur** : Vous devez d'abord vous connecter au serveur maître en entrant l'adresse IP et le port du serveur, puis en cliquant sur le bouton de connexion.
-- **Envoi de Fichiers** : Une fois connecté au serveur maître, vous pouvez sélectionner un fichier sur votre ordinateur et l'envoyer au serveur pour traitement.
-- **Réception des Résultats** : Les résultats du traitement des fichiers seront affichés dans l'historique des logs.
-- **Déconnexion** : Vous pouvez vous déconnecter du serveur maître à tout moment en cliquant sur le bouton de déconnexion.
+- **Sécurité** : L'accès a la page pour envoyer des fichiers aux servers ne s'ouvre qu'après s'etre authentifier.
 
-Note : Tant que vous n'êtes pas connecté au serveur maître, vous ne pouvez pas envoyer de fichiers.
+- **Surveillance** : L'application est doté d'une partie de log pour permettre a l'utilisateur de controler ses actions dans l'application, savoir si la connexion avec le server maitre est établie, si la connexion est rompue a n'importe quel moment, savoir si son fichier a bien été envoyé etc...
 
-## Fonctionnement des Serveurs
-- **Serveur Maître** : Gère les connexions des clients et distribue les tâches aux serveurs esclaves.
-- **Serveurs Esclaves** : Reçoivent les fichiers du serveur maître, les traitent et renvoient les résultats.
+- **Connexion au serveur** : L'application dispose d'une connexion renforcé avec le serveur permetant de vérifier la connexion avec le server maitre toutes les 5 secondes. Si la connexion est rompue un message d'erreur s'afficheras dans les logs.
 
-Cette application permet une interaction fluide avec le serveur maître et les serveurs esclaves pour le traitement de fichiers, offrant une expérience utilisateur simple et efficace.
+- **Transfert de fichier** : Cette fonctionnalité ne s'active que quand la connexion est établie avec le server maitre. Si l'utilisateur selectionn eun fichier autre que c, c++, java ou python, alors un message s'affiche en indiquant que le fichier n'est pas conforme.
+
+- **Affichage résultat** : Une fois le résultat reçus il s'afficheras dans la partie droite de l'application avec le nom du fichier ainsi que le résultat d'execution. Un résultat s'afficheras toujours meme en cas d'erreur dans le code afin de permettre a l'utilisateur de corrigé son code.
+
+## Option des serveur maitre / esclaves
+
+- **Identification client** : Dès qu'une connexion est établie avec un client, le serveur maitre lui attribue immédiatement un identifiant unique permetant une meilleur tracabilité des fichiers. Ce qui permet donc de renvoyer le résultat d'un fichier de manière rapide et fiable.
+
+- **Répartition des charges** : Le server maiter est chargé de répartir les fichiers vers les 4 servers esclaves, a savoir que chaques esclave a la capacité de compiler et executer les 4 languages pour permettre une meilleur disponibilité. Le server maitre répartie la charge en deux temp : 
+
+    1. Premièrement il vérifie le type de fichier. Si c'est un fichier python il va priorisé l'envoie vers le server 1, sinon si le fichier est un fichier c alors il va priorisé l'envoie vers le server 2 etc... Voici les priorités de language des servers esclaves : 
+        - Server-esclave-1 : Fichier Python
+        - Server-esclave-2 : Fichier C
+        - Server-esclave-3 : Fichier C++
+        - Server-esclave-4 : Fichier Java
+
+    2. Deuxièmement il vérifie la ram en temp réel des conteneurs. C'est a dire que le server maitre va regarder le type de fichier, si c'est un fichier python il va regarder la ram du conteneur esclave 1, si elle dépasse 60% alors il regarde si le conteneur esclave 2 ne dépasse pas les 60% de ram et ainsi de suite. Si tout les conteneurs esclaves sont tous surcharger alors il envoie le fichier par la priorité de language.
+
+    Cette méthode permet de répartir efficacement les charges en deux temps permettant de répartir une première fois de manière générale par le type de fichier puis de manière plus précise avec la ram permetant aux serveurs surcharger de ne pas l'etre d'avantage.
+
+- **Multie taches** : Le serveur maitre se décompose en deux partie, une partie qui reçoit les fichiers des clients et qui les envoies aux servers selon la répartission de charge détailler ci-dessus. Puis une deuxième partie qui va receptionner les fichiers executer des servers et les renvoyer aux clients. Les serveurs esclaves peuvent eux aussi executer et renvoyer des fichiers en simultanés.
 
 
 
+# Documentation Développeur
 
-# Documentation Programmeur
