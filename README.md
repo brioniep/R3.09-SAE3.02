@@ -115,48 +115,44 @@ python3 index.py
 
 # Documentation Utilisateur
 
-## 
-
 ### Table des matières
 
 - [Introduction](#introduction)
 - [Options de l'Application](#options-de-lapplication)
-
+- [Option des serveurs maître / esclaves](#option-des-serveurs-maitre--esclaves)
 
 ## Introduction
-Cette application client permet de se connecter à un serveur maître, d'envoyer des fichiers pour traitement et de recevoir les résultats. Elle est conçue pour être simple à utiliser et offre une interface graphique conviviale.
-Dans cette documentation utilisateur vous aurez une explication simple du projet, de ses fonctionnalités et fonctionnement. Si vous souhaitez avoir une analyse plus poussée du projet, je vous invite à vous rendre sur la [documentation développeur](#documentation-Développeur).
-
+Cette application client permet de se connecter à un **serveur maître**, d'envoyer des fichiers pour traitement et de recevoir les résultats. Elle est conçue pour être simple à utiliser et offre une interface graphique conviviale. Dans cette documentation utilisateur, vous aurez une explication simple du projet, de ses fonctionnalités et de son fonctionnement. Si vous souhaitez avoir une analyse plus poussée du projet, je vous invite à vous rendre sur la [documentation développeur](#documentation-Développeur).
 
 ## Options de l'Application
 
-- **Sécurité** : L'accès a la page pour envoyer des fichiers aux servers ne s'ouvre qu'après s'etre authentifier.
+- **🔒 Sécurité** : L'accès à la page pour envoyer des fichiers aux serveurs ne s'ouvre qu'après s'être authentifié.
 
-- **Surveillance** : L'application est doté d'une partie de log pour permettre a l'utilisateur de controler ses actions dans l'application, savoir si la connexion avec le server maitre est établie, si la connexion est rompue a n'importe quel moment, savoir si son fichier a bien été envoyé etc...
+- **📊 Surveillance** : L'application est dotée d'une partie de log pour permettre à l'utilisateur de contrôler ses actions dans l'application, savoir si la connexion avec le serveur maître est établie, si la connexion est rompue à n'importe quel moment, savoir si son fichier a bien été envoyé, etc.
 
-- **Connexion au serveur** : L'application dispose d'une connexion renforcé avec le serveur permetant de vérifier la connexion avec le server maitre toutes les 5 secondes. Si la connexion est rompue un message d'erreur s'afficheras dans les logs.
+- **🔗 Connexion au serveur** : L'application dispose d'une connexion renforcée avec le serveur permettant de vérifier la connexion avec le serveur maître toutes les 5 secondes. Si la connexion est rompue, un message d'erreur s'affichera dans les logs.
 
-- **Transfert de fichier** : Cette fonctionnalité ne s'active que quand la connexion est établie avec le server maitre. Si l'utilisateur selectionn eun fichier autre que c, c++, java ou python, alors un message s'affiche en indiquant que le fichier n'est pas conforme.
+- **📁 Transfert de fichier** : Cette fonctionnalité ne s'active que quand la connexion est établie avec le serveur maître. Si l'utilisateur sélectionne un fichier autre que C, C++, Java ou Python, alors un message s'affiche en indiquant que le fichier n'est pas conforme.
 
-- **Affichage résultat** : Une fois le résultat reçus il s'afficheras dans la partie droite de l'application avec le nom du fichier ainsi que le résultat d'execution. Un résultat s'afficheras toujours meme en cas d'erreur dans le code afin de permettre a l'utilisateur de corrigé son code.
+- **📄 Affichage résultat** : Une fois le résultat reçu, il s'affichera dans la partie droite de l'application avec le nom du fichier ainsi que le résultat d'exécution. Un résultat s'affichera toujours même en cas d'erreur dans le code afin de permettre à l'utilisateur de corriger son code.
 
-## Option des serveur maitre / esclaves
+## Option des serveurs maître / esclaves
 
-- **Identification client** : Dès qu'une connexion est établie avec un client, le serveur maitre lui attribue immédiatement un identifiant unique permetant une meilleur tracabilité des fichiers. Ce qui permet donc de renvoyer le résultat d'un fichier de manière rapide et fiable.
+- **🆔 Identification client** : Dès qu'une connexion est établie avec un client, le serveur maître lui attribue immédiatement un identifiant unique permettant une meilleure traçabilité des fichiers. Ce qui permet donc de renvoyer le résultat d'un fichier de manière rapide et fiable.
 
-- **Répartition des charges** : Le server maiter est chargé de répartir les fichiers vers les 4 servers esclaves, a savoir que chaques esclave a la capacité de compiler et executer les 4 languages pour permettre une meilleur disponibilité. Le server maitre répartie la charge en deux temp : 
+- **⚖️ Répartition des charges** : Le serveur maître est chargé de répartir les fichiers vers les 4 serveurs esclaves. Chaque esclave a la capacité de compiler et exécuter les 4 langages pour permettre une meilleure disponibilité. Le serveur maître répartit la charge en deux temps :
 
-    1. Premièrement il vérifie le type de fichier. Si c'est un fichier python il va priorisé l'envoie vers le server 1, sinon si le fichier est un fichier c alors il va priorisé l'envoie vers le server 2 etc... Voici les priorités de language des servers esclaves : 
-        - Server-esclave-1 : Fichier Python
-        - Server-esclave-2 : Fichier C
-        - Server-esclave-3 : Fichier C++
-        - Server-esclave-4 : Fichier Java
+    1. Premièrement, il vérifie le type de fichier. Si c'est un fichier Python, il va prioriser l'envoi vers le serveur 1, sinon si le fichier est un fichier C, alors il va prioriser l'envoi vers le serveur 2, etc. Voici les priorités de langage des serveurs esclaves :
+        - **Serveur-esclave-1** : Fichier Python
+        - **Serveur-esclave-2** : Fichier C
+        - **Serveur-esclave-3** : Fichier C++
+        - **Serveur-esclave-4** : Fichier Java
 
-    2. Deuxièmement il vérifie la ram en temp réel des conteneurs. C'est a dire que le server maitre va regarder le type de fichier, si c'est un fichier python il va regarder la ram du conteneur esclave 1, si elle dépasse 60% alors il regarde si le conteneur esclave 2 ne dépasse pas les 60% de ram et ainsi de suite. Si tout les conteneurs esclaves sont tous surcharger alors il envoie le fichier par la priorité de language.
+    2. Deuxièmement, il vérifie la RAM en temps réel des conteneurs. C'est-à-dire que le serveur maître va regarder le type de fichier, si c'est un fichier Python, il va regarder la RAM du conteneur esclave 1, si elle dépasse 60%, alors il regarde si le conteneur esclave 2 ne dépasse pas les 60% de RAM et ainsi de suite. Si tous les conteneurs esclaves sont tous surchargés, alors il envoie le fichier par la priorité de langage.
 
-    Cette méthode permet de répartir efficacement les charges en deux temps permettant de répartir une première fois de manière générale par le type de fichier puis de manière plus précise avec la ram permetant aux serveurs surcharger de ne pas l'etre d'avantage.
+    Cette méthode permet de répartir efficacement les charges en deux temps, permettant de répartir une première fois de manière générale par le type de fichier puis de manière plus précise avec la RAM permettant aux serveurs surchargés de ne pas l'être davantage.
 
-- **Multie taches** : Le serveur maitre se décompose en deux partie, une partie qui reçoit les fichiers des clients et qui les envoies aux servers selon la répartission de charge détailler ci-dessus. Puis une deuxième partie qui va receptionner les fichiers executer des servers et les renvoyer aux clients. Les serveurs esclaves peuvent eux aussi executer et renvoyer des fichiers en simultanés.
+- **🔄 Multitâches** : Le serveur maître se décompose en deux parties, une partie qui reçoit les fichiers des clients et qui les envoie aux serveurs selon la répartition de charge détaillée ci-dessus. Puis une deuxième partie qui va réceptionner les fichiers exécutés des serveurs et les renvoyer aux clients. Les serveurs esclaves peuvent eux aussi exécuter et renvoyer des fichiers en simultané.
 
 
 
