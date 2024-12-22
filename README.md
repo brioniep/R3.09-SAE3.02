@@ -142,15 +142,15 @@ Cette application client permet de se connecter à un **serveur maître**, d'env
 
 - **⚖️ Répartition des charges** : Le serveur maître est chargé de répartir les fichiers vers les 4 serveurs esclaves. Chaque esclave a la capacité de compiler et exécuter les 4 langages pour permettre une meilleure disponibilité. Le serveur maître répartit la charge en deux temps :
 
-    1. Premièrement, il vérifie le type de fichier. Si c'est un fichier Python, il va prioriser l'envoi vers le serveur 1, sinon si le fichier est un fichier C, alors il va prioriser l'envoi vers le serveur 2, etc. Voici les priorités de langage des serveurs esclaves :
-        - **Serveur-esclave-1** : Fichier Python
-        - **Serveur-esclave-2** : Fichier C
-        - **Serveur-esclave-3** : Fichier C++
-        - **Serveur-esclave-4** : Fichier Java
+1. Premièrement, il vérifie le type de fichier. Si c'est un fichier Python, il va prioriser l'envoi vers le serveur 1, sinon si le fichier est un fichier C, alors il va prioriser l'envoi vers le serveur 2, etc. Voici les priorités de langage des serveurs esclaves :
+    - **Serveur-esclave-1** : Fichier Python
+    - **Serveur-esclave-2** : Fichier C
+    - **Serveur-esclave-3** : Fichier C++
+    - **Serveur-esclave-4** : Fichier Java
 
-    2. Deuxièmement, il vérifie la RAM en temps réel des conteneurs. C'est-à-dire que le serveur maître va regarder le type de fichier, si c'est un fichier Python, il va regarder la RAM du conteneur esclave 1, si elle dépasse 60%, alors il regarde si le conteneur esclave 2 ne dépasse pas les 60% de RAM et ainsi de suite. Si tous les conteneurs esclaves sont tous surchargés, alors il envoie le fichier par la priorité de langage.
+2. Deuxièmement, il vérifie la RAM en temps réel des conteneurs. C'est-à-dire que le serveur maître va regarder le type de fichier, si c'est un fichier Python, il va regarder la RAM du conteneur esclave 1, si elle dépasse 60%, alors il regarde si le conteneur esclave 2 ne dépasse pas les 60% de RAM et ainsi de suite. Si tous les conteneurs esclaves sont tous surchargés, alors il envoie le fichier par la priorité de langage.
 
-    Cette méthode permet de répartir efficacement les charges en deux temps, permettant de répartir une première fois de manière générale par le type de fichier puis de manière plus précise avec la RAM permettant aux serveurs surchargés de ne pas l'être davantage.
+Cette méthode permet de répartir efficacement les charges en deux temps, permettant de répartir une première fois de manière générale par le type de fichier puis de manière plus précise avec la RAM permettant aux serveurs surchargés de ne pas l'être davantage.
 
 - **🔄 Multitâches** : Le serveur maître se décompose en deux parties, une partie qui reçoit les fichiers des clients et qui les envoie aux serveurs selon la répartition de charge détaillée ci-dessus. Puis une deuxième partie qui va réceptionner les fichiers exécutés des serveurs et les renvoyer aux clients. Les serveurs esclaves peuvent eux aussi exécuter et renvoyer des fichiers en simultané.
 
