@@ -2,21 +2,22 @@ import sys
 from PyQt6.QtWidgets import *
 from PyQt6.QtCore import *
 from index import *
+from style import *
 
 class LoginWindow(QWidget):
-    from style_connexion import apply_styles
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Page de Connexion")
         self.setMinimumSize(600, 400)
+        self.authenticated = False
 
-        self.user_label = QLabel("Identifiant:")
+        self.user_label = QLabel("Identifiant :")
         self.user_label.setStyleSheet("font-size: 24px; font-weight: bold;")
         self.user_input = QLineEdit()
         self.user_input.setFont(self.font())
 
-        self.pass_label = QLabel("Mot de passe:")
-        self.pass_label.setStyleSheet("font-²size: 24px; font-weight: bold;")
+        self.pass_label = QLabel("Mot de passe :")
+        self.pass_label.setStyleSheet("font-size: 24px; font-weight: bold;")
         self.pass_input = QLineEdit()
         self.pass_input.setEchoMode(QLineEdit.EchoMode.Password)
         self.pass_input.setFont(self.font())
@@ -42,7 +43,6 @@ class LoginWindow(QWidget):
         layout.addWidget(self.error_label)
         
         self.setLayout(layout)
-        self.apply_styles()
 
         self.error_timer = QTimer()
         self.error_timer.setSingleShot(True)
@@ -50,15 +50,15 @@ class LoginWindow(QWidget):
 
     
     def check_login(self):
-        username = "toto"
-        password = "toto"
-
-        if self.user_input.text() == username and self.pass_input.text() == password:
+        if self.user_input.text() == "toto" and self.pass_input.text() == "toto":
+            self.authenticated = True
             self.open_server_config()
         else:
+            self.authenticated = False
             self.show_error_message()
 
     def show_error_message(self):
+        self.error_label.setText("Identifiant ou mot de passe incorrect")
         self.error_label.setVisible(True)
         self.error_timer.start(5000)
 
@@ -66,14 +66,17 @@ class LoginWindow(QWidget):
         self.error_label.setVisible(False)
 
     def open_server_config(self):
-        self.server_config_window = MaFenetre()
+        self.server_config_window = MaFenetre(authenticated=self.authenticated)
+        style_index(self.server_config_window)
         self.server_config_window.show()
         self.close()
 
 
 
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    window = LoginWindow()        
+    window = LoginWindow()
+    style_connexion(window)        
     window.show()
     sys.exit(app.exec())

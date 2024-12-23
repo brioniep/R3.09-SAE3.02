@@ -1,19 +1,22 @@
-import sys
-import socket
-import os
+import sys, socket, os, re
 from PyQt6.QtWidgets import *
 from PyQt6.QtCore import *
-import re
-import time
-from style_index import apply_stylesheet  # Import the apply_stylesheet function
+from style import *
 
 class MaFenetre(QWidget):
-    def __init__(self):
+    def __init__(self, authenticated=False):  # Ajout du paramètre authenticated
         super().__init__()
+        
+        # Vérification de l'authentification
+        if not authenticated:
+            QMessageBox.critical(None, "Erreur", "Accès non autorisé. Veuillez vous connecter.")
+            sys.exit()  # Ferme l'application si non authentifié
+
         self.setWindowTitle("Client PyQt6 - Connexion au Serveur")
         self.socket_client = None
         self.est_connecte = False
         self.initUI()
+
 
     def initUI(self):
         disposition_grille = QGridLayout()
@@ -106,7 +109,6 @@ class MaFenetre(QWidget):
 
         except Exception as e:
             self.historique_logs.append(f"<span style='color: red;'>[-]</span> Erreur lors de la connexion : {e}")
-            print(f"[-] Erreur lors de la connexion : {e}")
 
     def deconnexion_du_serveur(self):
         if self.est_connecte:
@@ -201,8 +203,8 @@ class MaFenetre(QWidget):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    apply_stylesheet(app)  # Apply the stylesheet
     fenetre = MaFenetre()
+    style_index(fenetre)
     fenetre.resize(800, 500)
     fenetre.show()
     sys.exit(app.exec())
