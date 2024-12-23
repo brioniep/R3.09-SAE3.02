@@ -4,12 +4,12 @@ import os
 from PyQt6.QtWidgets import *
 from PyQt6.QtCore import *
 import re
-from style import * 
+from style import *
 
 class MaFenetre(QWidget):
     def __init__(self, authenticated=False):  # Ajout du paramètre authenticated
         super().__init__()
-        
+
         # Vérification de l'authentification
         if not authenticated:
             QMessageBox.critical(None, "Erreur", "Accès non autorisé. Veuillez vous connecter.")
@@ -18,6 +18,7 @@ class MaFenetre(QWidget):
         self.setWindowTitle("Client PyQt6 - Connexion au Serveur")
         self.socket_client = None
         self.est_connecte = False
+        self.tentatives_connexion = False  # Indicateur pour savoir si la tentative de connexion est en cours
         self.initUI()
 
     def initUI(self):
@@ -68,15 +69,26 @@ class MaFenetre(QWidget):
         self.selection_fichier.clicked.connect(self.selectionner_fichier)
         self.telecharger.clicked.connect(self.envoyer_fichier)
 
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.connexion_au_serveur)  # Réessayer la connexion toutes les 5 secondes
+
     def quitter_app(self):
         if self.est_connecte:
             self.deconnexion_du_serveur()
         self.close()
 
     def gestion_connexion(self):
+        # Si nous sommes déjà connectés, nous déconnectons
         if self.est_connecte:
             self.deconnexion_du_serveur()
+        elif self.tentatives_connexion:
+            # Si une tentative de connexion est en cours, arrêter la tentative
+            self.historique_logs.append("<span style='color: red;'>[-]</span> Tentative de connexion arrêtée.")
+            self.timer.stop()
+            self.connexion.setText("Connexion")
+            self.tentatives_connexion = False
         else:
+            # Sinon, essayer de se connecter
             self.connexion_au_serveur()
 
     def connexion_au_serveur(self):
@@ -100,6 +112,12 @@ class MaFenetre(QWidget):
             self.historique_logs.append("<span style='color: red;'>[-]</span> Déjà connecté au serveur.")
             return
 
+        # Démarrer la tentative de connexion
+        self.historique_logs.append("<span style='color: orange;'>[!]</span> Tentative de connexion...")
+        self.tentatives_connexion = True
+        self.connexion.setText("Stop")  # Changer le texte du bouton pour "Stop"
+        self.timer.start(5000)  # Essayer toutes les 5 secondes
+
         try:
             self.socket_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.socket_client.connect((ip, port))
@@ -112,8 +130,9 @@ class MaFenetre(QWidget):
             self.recepteur_thread.run = self.recevoir_donnees  # Overriding the run method
             self.recepteur_thread.start()
 
-            self.historique_logs.append(f"<span style='color: green;'>[+]</span>Connexion réussie à {ip}:{port}")
-            self.connexion.setText("Déconnexion")  # Changer le texte du bouton
+            self.historique_logs.append(f"<span style='color: green;'>[+]</span> Connexion réussie à {ip}:{port}")
+            self.connexion.setText("Déconnexion")  # Changer le texte du bouton en "Déconnexion"
+            self.timer.stop()  # Arrêter le timer car la connexion a réussi
 
         except Exception as e:
             self.historique_logs.append(f"<span style='color: red;'>[-]</span> Erreur lors de la connexion : {e}")
@@ -132,6 +151,8 @@ class MaFenetre(QWidget):
                     self.recepteur_thread.quit()
                     self.recepteur_thread = None
                 self.connexion.setText("Connexion")  # Remettre le texte à "Connexion"
+                self.tentatives_connexion = False  # Réinitialiser la tentative de connexion
+                self.timer.stop()  # Arrêter le timer
             except Exception as e:
                 self.historique_logs.append(f"<span style='color: red;'>[-]</span> Erreur lors de la déconnexion : {e}")
                 print(f"[-] Erreur lors de la déconnexion : {e}")
