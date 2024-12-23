@@ -4,12 +4,12 @@ import os
 from PyQt6.QtWidgets import *
 from PyQt6.QtCore import *
 import re
-from style import *
+import time
 
 class MaFenetre(QWidget):
     def __init__(self, authenticated=False):  # Ajout du paramètre authenticated
         super().__init__()
-
+        
         # Vérification de l'authentification
         if not authenticated:
             QMessageBox.critical(None, "Erreur", "Accès non autorisé. Veuillez vous connecter.")
@@ -18,7 +18,6 @@ class MaFenetre(QWidget):
         self.setWindowTitle("Client PyQt6 - Connexion au Serveur")
         self.socket_client = None
         self.est_connecte = False
-        self.tentatives_connexion = False  # Indicateur pour savoir si la tentative de connexion est en cours
         self.initUI()
 
     def initUI(self):
@@ -28,8 +27,8 @@ class MaFenetre(QWidget):
         self.ip_input = QLineEdit("192.168.1.11")
         self.port = QLabel("Port: ")
         self.port_input = QLineEdit("1234")
-        self.connexion = QPushButton("Connexion")  # Le bouton unique
-        self.connexion.setEnabled(True)
+        self.connecter = QPushButton("Connexion")
+        self.deconnecter = QPushButton("Déconnexion")
 
         self.selection_fichier = QPushButton("Sélectionner un fichier")
         self.selection_fichier.setEnabled(False)
@@ -50,9 +49,9 @@ class MaFenetre(QWidget):
         disposition_grille.addWidget(self.ip_input, 0, 1)
         disposition_grille.addWidget(self.port, 1, 0)
         disposition_grille.addWidget(self.port_input, 1, 1)
-        disposition_grille.addWidget(self.connexion, 2, 0, 1, 2)  # Remplacer par un seul bouton
-
+        disposition_grille.addWidget(self.connecter, 2, 0, 1, 2)
         disposition_grille.addWidget(self.historique_logs, 3, 0, 1, 2)
+        disposition_grille.addWidget(self.deconnecter, 4, 0, 1, 2)
 
         disposition_grille.addWidget(self.selection_fichier, 0, 2)
         disposition_grille.addWidget(self.telecharger, 0, 3)
@@ -64,32 +63,16 @@ class MaFenetre(QWidget):
 
         self.setLayout(disposition_grille)
 
-        self.connexion.clicked.connect(self.gestion_connexion)  # Gérer la connexion/déconnexion par un seul bouton
+        self.connecter.clicked.connect(self.connexion_au_serveur)
+        self.deconnecter.clicked.connect(self.deconnexion_du_serveur)
 
         self.selection_fichier.clicked.connect(self.selectionner_fichier)
         self.telecharger.clicked.connect(self.envoyer_fichier)
-
-        self.timer = QTimer(self)
-        self.timer.timeout.connect(self.connexion_au_serveur)  # Réessayer la connexion toutes les 5 secondes
 
     def quitter_app(self):
         if self.est_connecte:
             self.deconnexion_du_serveur()
         self.close()
-
-    def gestion_connexion(self):
-        # Si nous sommes déjà connectés, nous déconnectons
-        if self.est_connecte:
-            self.deconnexion_du_serveur()
-        elif self.tentatives_connexion:
-            # Si une tentative de connexion est en cours, arrêter la tentative
-            self.historique_logs.append("<span style='color: red;'>[-]</span> Tentative de connexion arrêtée.")
-            self.timer.stop()
-            self.connexion.setText("Connexion")
-            self.tentatives_connexion = False
-        else:
-            # Sinon, essayer de se connecter
-            self.connexion_au_serveur()
 
     def connexion_au_serveur(self):
         ip = self.ip_input.text()
@@ -112,12 +95,6 @@ class MaFenetre(QWidget):
             self.historique_logs.append("<span style='color: red;'>[-]</span> Déjà connecté au serveur.")
             return
 
-        # Démarrer la tentative de connexion
-        self.historique_logs.append("<span style='color: orange;'>[!]</span> Tentative de connexion...")
-        self.tentatives_connexion = True
-        self.connexion.setText("Stop")  # Changer le texte du bouton pour "Stop"
-        self.timer.start(5000)  # Essayer toutes les 5 secondes
-
         try:
             self.socket_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.socket_client.connect((ip, port))
@@ -130,9 +107,12 @@ class MaFenetre(QWidget):
             self.recepteur_thread.run = self.recevoir_donnees  # Overriding the run method
             self.recepteur_thread.start()
 
-            self.historique_logs.append(f"<span style='color: green;'>[+]</span> Connexion réussie à {ip}:{port}")
-            self.connexion.setText("Déconnexion")  # Changer le texte du bouton en "Déconnexion"
-            self.timer.stop()  # Arrêter le timer car la connexion a réussi
+            # Démarrage du thread de vérification de connexion
+            self.verificateur_thread = QThread(self)
+            self.verificateur_thread.run = self.verifier_connexion  # Overriding the run method
+            self.verificateur_thread.start()
+
+            self.historique_logs.append(f"<span style='color: green;'>[+]</span>Connexion réussie à {ip}:{port}")
 
         except Exception as e:
             self.historique_logs.append(f"<span style='color: red;'>[-]</span> Erreur lors de la connexion : {e}")
@@ -146,18 +126,27 @@ class MaFenetre(QWidget):
                 self.selection_fichier.setEnabled(False)
                 self.telecharger.setEnabled(False)
                 self.historique_logs.append("<span style='color: green;'>[+]</span> Déconnexion réussie.")
-                print("Déconnexion réussie.")
                 if self.recepteur_thread:
                     self.recepteur_thread.quit()
                     self.recepteur_thread = None
-                self.connexion.setText("Connexion")  # Remettre le texte à "Connexion"
-                self.tentatives_connexion = False  # Réinitialiser la tentative de connexion
-                self.timer.stop()  # Arrêter le timer
+                if self.verificateur_thread:
+                    self.verificateur_thread.quit()
+                    self.verificateur_thread = None
             except Exception as e:
                 self.historique_logs.append(f"<span style='color: red;'>[-]</span> Erreur lors de la déconnexion : {e}")
                 print(f"[-] Erreur lors de la déconnexion : {e}")
         else:
             self.historique_logs.append("<span style='color: red;'>[-]</span> Pas de connexion active.")
+
+    def verifier_connexion(self):
+        while self.est_connecte:
+            try:
+                self.socket_client.sendall(b'ping')
+                time.sleep(5)
+            except Exception as e:
+                self.historique_logs.append(f"<span style='color: red;'>[-]</span> Connexion perdue avec le serveur maitre")
+                self.deconnexion_du_serveur()
+                break
 
     def selectionner_fichier(self):
         fichier = QFileDialog.getOpenFileName(self, "Sélectionner un fichier", "", "Tous les fichiers (*);;Fichiers texte (*.txt);;Images (*.png *.xpm *.jpg)")

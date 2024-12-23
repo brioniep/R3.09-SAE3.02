@@ -71,12 +71,9 @@ class LoginWindow(QWidget):
         self.server_config_window.show()
         self.close()
 
-
-
-
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = LoginWindow()
-    style_connexion(window)        
+    style_connexion(window) 
     window.show()
     sys.exit(app.exec())
