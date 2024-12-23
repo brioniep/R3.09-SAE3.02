@@ -1,7 +1,10 @@
-import sys, socket, os, re
+import sys
+import socket
+import os
 from PyQt6.QtWidgets import *
 from PyQt6.QtCore import *
-from style import *
+import re
+from style import * 
 
 class MaFenetre(QWidget):
     def __init__(self, authenticated=False):  # Ajout du paramètre authenticated
@@ -17,7 +20,6 @@ class MaFenetre(QWidget):
         self.est_connecte = False
         self.initUI()
 
-
     def initUI(self):
         disposition_grille = QGridLayout()
 
@@ -25,8 +27,8 @@ class MaFenetre(QWidget):
         self.ip_input = QLineEdit("192.168.1.11")
         self.port = QLabel("Port: ")
         self.port_input = QLineEdit("1234")
-        self.connecter = QPushButton("Connexion")
-        self.deconnecter = QPushButton("Déconnexion")
+        self.connexion = QPushButton("Connexion")  # Le bouton unique
+        self.connexion.setEnabled(True)
 
         self.selection_fichier = QPushButton("Sélectionner un fichier")
         self.selection_fichier.setEnabled(False)
@@ -47,9 +49,9 @@ class MaFenetre(QWidget):
         disposition_grille.addWidget(self.ip_input, 0, 1)
         disposition_grille.addWidget(self.port, 1, 0)
         disposition_grille.addWidget(self.port_input, 1, 1)
-        disposition_grille.addWidget(self.connecter, 2, 0, 1, 2)
+        disposition_grille.addWidget(self.connexion, 2, 0, 1, 2)  # Remplacer par un seul bouton
+
         disposition_grille.addWidget(self.historique_logs, 3, 0, 1, 2)
-        disposition_grille.addWidget(self.deconnecter, 4, 0, 1, 2)
 
         disposition_grille.addWidget(self.selection_fichier, 0, 2)
         disposition_grille.addWidget(self.telecharger, 0, 3)
@@ -61,8 +63,7 @@ class MaFenetre(QWidget):
 
         self.setLayout(disposition_grille)
 
-        self.connecter.clicked.connect(self.connexion_au_serveur)
-        self.deconnecter.clicked.connect(self.deconnexion_du_serveur)
+        self.connexion.clicked.connect(self.gestion_connexion)  # Gérer la connexion/déconnexion par un seul bouton
 
         self.selection_fichier.clicked.connect(self.selectionner_fichier)
         self.telecharger.clicked.connect(self.envoyer_fichier)
@@ -71,6 +72,12 @@ class MaFenetre(QWidget):
         if self.est_connecte:
             self.deconnexion_du_serveur()
         self.close()
+
+    def gestion_connexion(self):
+        if self.est_connecte:
+            self.deconnexion_du_serveur()
+        else:
+            self.connexion_au_serveur()
 
     def connexion_au_serveur(self):
         ip = self.ip_input.text()
@@ -106,9 +113,11 @@ class MaFenetre(QWidget):
             self.recepteur_thread.start()
 
             self.historique_logs.append(f"<span style='color: green;'>[+]</span>Connexion réussie à {ip}:{port}")
+            self.connexion.setText("Déconnexion")  # Changer le texte du bouton
 
         except Exception as e:
             self.historique_logs.append(f"<span style='color: red;'>[-]</span> Erreur lors de la connexion : {e}")
+            print(f"[-] Erreur lors de la connexion : {e}")
 
     def deconnexion_du_serveur(self):
         if self.est_connecte:
@@ -122,6 +131,7 @@ class MaFenetre(QWidget):
                 if self.recepteur_thread:
                     self.recepteur_thread.quit()
                     self.recepteur_thread = None
+                self.connexion.setText("Connexion")  # Remettre le texte à "Connexion"
             except Exception as e:
                 self.historique_logs.append(f"<span style='color: red;'>[-]</span> Erreur lors de la déconnexion : {e}")
                 print(f"[-] Erreur lors de la déconnexion : {e}")
@@ -204,7 +214,6 @@ class MaFenetre(QWidget):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     fenetre = MaFenetre()
-    style_index(fenetre)
     fenetre.resize(800, 500)
     fenetre.show()
     sys.exit(app.exec())
