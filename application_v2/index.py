@@ -4,16 +4,14 @@ import os
 from PyQt6.QtWidgets import *
 from PyQt6.QtCore import *
 import re
-import time
 
 class MaFenetre(QWidget):
-    def __init__(self, authenticated=False):  # Ajout du paramètre authenticated
+    def __init__(self, authenticated=False):  
         super().__init__()
-        
-        # Vérification de l'authentification
+
         if not authenticated:
             QMessageBox.critical(None, "Erreur", "Accès non autorisé. Veuillez vous connecter.")
-            sys.exit()  # Ferme l'application si non authentifié
+            sys.exit() 
 
         self.setWindowTitle("Client PyQt6 - Connexion au Serveur")
         self.socket_client = None
@@ -78,13 +76,11 @@ class MaFenetre(QWidget):
         ip = self.ip_input.text()
         port = self.port_input.text()
 
-        # Vérification de l'adresse IP
         ip_regex = re.compile(r"^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$")
         if not ip_regex.match(ip):
             QMessageBox.warning(self, "Erreur de syntaxe", "L'adresse IP est incorrecte.")
             return
 
-        # Vérification du port
         if not port.isdigit() or not (0 <= int(port) <= 65535):
             QMessageBox.warning(self, "Erreur de syntaxe", "Le port est incorrect.")
             return
@@ -102,15 +98,9 @@ class MaFenetre(QWidget):
             self.selection_fichier.setEnabled(True)
             self.telecharger.setEnabled(True)
 
-            # Démarrage du thread de réception
             self.recepteur_thread = QThread(self)
-            self.recepteur_thread.run = self.recevoir_donnees  # Overriding the run method
+            self.recepteur_thread.run = self.recevoir_donnees
             self.recepteur_thread.start()
-
-            # Démarrage du thread de vérification de connexion
-            self.verificateur_thread = QThread(self)
-            self.verificateur_thread.run = self.verifier_connexion  # Overriding the run method
-            self.verificateur_thread.start()
 
             self.historique_logs.append(f"<span style='color: green;'>[+]</span>Connexion réussie à {ip}:{port}")
 
@@ -126,27 +116,15 @@ class MaFenetre(QWidget):
                 self.selection_fichier.setEnabled(False)
                 self.telecharger.setEnabled(False)
                 self.historique_logs.append("<span style='color: green;'>[+]</span> Déconnexion réussie.")
+                print("Déconnexion réussie.")
                 if self.recepteur_thread:
                     self.recepteur_thread.quit()
                     self.recepteur_thread = None
-                if self.verificateur_thread:
-                    self.verificateur_thread.quit()
-                    self.verificateur_thread = None
             except Exception as e:
                 self.historique_logs.append(f"<span style='color: red;'>[-]</span> Erreur lors de la déconnexion : {e}")
                 print(f"[-] Erreur lors de la déconnexion : {e}")
         else:
             self.historique_logs.append("<span style='color: red;'>[-]</span> Pas de connexion active.")
-
-    def verifier_connexion(self):
-        while self.est_connecte:
-            try:
-                self.socket_client.sendall(b'ping')
-                time.sleep(5)
-            except Exception as e:
-                self.historique_logs.append(f"<span style='color: red;'>[-]</span> Connexion perdue avec le serveur maitre")
-                self.deconnexion_du_serveur()
-                break
 
     def selectionner_fichier(self):
         fichier = QFileDialog.getOpenFileName(self, "Sélectionner un fichier", "", "Tous les fichiers (*);;Fichiers texte (*.txt);;Images (*.png *.xpm *.jpg)")
@@ -170,13 +148,13 @@ class MaFenetre(QWidget):
             return
 
         try:
-            with open(chemin_fichier, 'rb') as f:  # Ouvrir le fichier en mode binaire
+            with open(chemin_fichier, 'rb') as f:
                 fichier_nom = os.path.basename(chemin_fichier)
-                self.socket_client.sendall(fichier_nom.encode('utf-8') + b"\n")  # Envoi du nom du fichier
+                self.socket_client.sendall(fichier_nom.encode('utf-8') + b"\n")
                 contenu_fichier = f.read()
                 try:
-                    self.socket_client.sendall(contenu_fichier)  # Envoi binaire du fichier
-                    self.socket_client.sendall(b"\0")  # Signal de fin de transmission (utilisation d'un octet nul)
+                    self.socket_client.sendall(contenu_fichier)
+                    self.socket_client.sendall(b"\0")
                 except Exception as e:
                     print(f"Erreur lors de l'envoi du fichier : {e}")
                     return
@@ -193,7 +171,6 @@ class MaFenetre(QWidget):
             try:
                 donnees = self.socket_client.recv(4096).decode('utf-8')
                 if donnees:
-                    # Séparer le nom du fichier et le contenu
                     nom_fichier, contenu_fichier = donnees.split('|||', 1)
                     self.afficher_message(nom_fichier, contenu_fichier)
                 else:
@@ -211,12 +188,10 @@ class MaFenetre(QWidget):
         elif extention == ".c":
             prompt = f"<span style='color: green;'>╔═[</span>user@client:~/workspace]<br><span style='color: green;'>╚═══> $</span> gcc {nom_fichier} -o {nom_fichier.rsplit('.', 1)[0]}"
         elif extention == ".cpp":
-            prompt = f"<span style='color: orange;'>╔═[</span>user@client:~/workspace]<br><span style='color: purple;'>╚═══> $</span> g++ {nom_fichier} -o {nom_fichier.rsplit('.', 1)[0]}"
+            prompt = f"<span style='color: orange;'>╔═[</span>user@client:~/workspace]<br><span style='color: orange;'>╚═══> $</span> g++ {nom_fichier} -o {nom_fichier.rsplit('.', 1)[0]}"
         elif extention == ".java":
             prompt = f"<span style='color: red;'>╔═[</span>user@client:~/workspace]<br><span style='color: red;'>╚═══> $</span> javac {nom_fichier}"
 
-
-        # Stocker et afficher
         self.fichiers_recus.append(prompt)
         self.fichiers_recus.append(contenu_fichier)
         self.historique_logs.append(f"<span style='color: green;'>[+]</span> Fichier '{nom_fichier}' reçu avec succès : {nom_fichier}")

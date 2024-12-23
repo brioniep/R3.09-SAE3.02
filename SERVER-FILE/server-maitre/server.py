@@ -65,8 +65,10 @@ class ServerMaitre:
         try:
             while True:
                 nom_fichier = socket_client.recv(1024).decode('utf-8').strip()
+                
+                # Ignorer les messages vides
                 if not nom_fichier:
-                    break
+                    continue
 
                 contenu_fichier = b""
                 while True:
@@ -77,8 +79,9 @@ class ServerMaitre:
                     if b"\x00" in donnees:
                         break
 
-                if contenu_fichier.endswith(b'\x00'):
-                    contenu_fichier = contenu_fichier[:-1]
+                # Si le message est un octet nul (b'\x00'), l'ignorer
+                if contenu_fichier == b'\x00':
+                    continue
 
                 contenu_fichier_str = contenu_fichier.decode('utf-8', errors='replace')
 
@@ -94,6 +97,7 @@ class ServerMaitre:
             del self.clients[id_client]  # Supprimer le client après déconnexion
             socket_client.close()
             print(f"[-] Client {id_client} déconnecté.")
+
 
 
 
