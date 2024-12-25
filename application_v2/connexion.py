@@ -1,6 +1,6 @@
-import sys
 from PyQt6.QtWidgets import *
 from PyQt6.QtCore import *
+import sys
 from index import *
 from style import *
 
@@ -22,9 +22,12 @@ class LoginWindow(QWidget):
         self.pass_input.setEchoMode(QLineEdit.EchoMode.Password)
         self.pass_input.setFont(self.font())
 
-        self.login_button = QPushButton("Connexion")
+        self.login_button = QPushButton("Connexion")  # Le bouton est défini ici
         self.login_button.setFont(self.font())
         self.login_button.clicked.connect(self.check_login)
+
+        # Connecter le signal returnPressed ici, après avoir défini login_button
+        self.pass_input.returnPressed.connect(self.login_button.click)
 
         self.error_label = QLabel("Identification incorrecte")
         self.error_label.setStyleSheet("color: red; font-size: 20px; font-weight: bold;")
@@ -48,7 +51,6 @@ class LoginWindow(QWidget):
         self.error_timer.setSingleShot(True)
         self.error_timer.timeout.connect(self.hide_error_message)
 
-    
     def check_login(self):
         if self.user_input.text() == "toto" and self.pass_input.text() == "toto":
             self.authenticated = True

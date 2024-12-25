@@ -184,13 +184,13 @@ class MaFenetre(QWidget):
 
         prompt = ""
         if extention == ".py":
-            prompt = f"<span style='color: blue;'>╔═[</span>user@client:~/workspace]<br><span style='color: blue;'>╚═══> $</span> python3 {nom_fichier}"
+            prompt = f"<span style='color: blue;'>╔═[</span>user@client:~/workspace]<br><span style='color: blue;'>╚═══> $</span> {nom_fichier}"
         elif extention == ".c":
-            prompt = f"<span style='color: green;'>╔═[</span>user@client:~/workspace]<br><span style='color: green;'>╚═══> $</span> gcc {nom_fichier} -o {nom_fichier.rsplit('.', 1)[0]}"
+            prompt = f"<span style='color: green;'>╔═[</span>user@client:~/workspace]<br><span style='color: green;'>╚═══> $</span> {nom_fichier}"
         elif extention == ".cpp":
-            prompt = f"<span style='color: orange;'>╔═[</span>user@client:~/workspace]<br><span style='color: orange;'>╚═══> $</span> g++ {nom_fichier} -o {nom_fichier.rsplit('.', 1)[0]}"
+            prompt = f"<span style='color: orange;'>╔═[</span>user@client:~/workspace]<br><span style='color: orange;'>╚═══> $</span> {nom_fichier}"
         elif extention == ".java":
-            prompt = f"<span style='color: red;'>╔═[</span>user@client:~/workspace]<br><span style='color: red;'>╚═══> $</span> javac {nom_fichier}"
+            prompt = f"<span style='color: red;'>╔═[</span>user@client:~/workspace]<br><span style='color: red;'>╚═══> $</span> {nom_fichier}"
 
         self.fichiers_recus.append(prompt)
         self.fichiers_recus.append(contenu_fichier)
