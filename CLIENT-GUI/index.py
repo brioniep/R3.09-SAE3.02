@@ -4,11 +4,15 @@ import os
 from PyQt6.QtWidgets import *
 from PyQt6.QtCore import *
 import re
-from style_index import apply_stylesheet 
 
 class MaFenetre(QWidget):
-    def __init__(self):
+    def __init__(self, authenticated=False):  
         super().__init__()
+
+        if not authenticated:
+            QMessageBox.critical(None, "Erreur", "Accès non autorisé. Veuillez vous connecter.")
+            sys.exit() 
+
         self.setWindowTitle("Client PyQt6 - Connexion au Serveur")
         self.socket_client = None
         self.est_connecte = False
@@ -38,6 +42,8 @@ class MaFenetre(QWidget):
         self.historique_logs.setReadOnly(True)
 
         self.quitter = QPushButton("Quitter")
+        self.aide = QPushButton("Aide ?")
+
 
         disposition_grille.addWidget(self.ip, 0, 0)
         disposition_grille.addWidget(self.ip_input, 0, 1)
@@ -52,8 +58,12 @@ class MaFenetre(QWidget):
         disposition_grille.addWidget(self.chemin, 1, 2, 1, 2)
         disposition_grille.addWidget(self.fichiers_recus, 2, 2, 3, 2)
 
-        disposition_grille.addWidget(self.quitter, 5, 0, 1, 4)
+        disposition_grille.addWidget(self.quitter, 5, 0, 1, 2)  # Place "quitter" dans la ligne 5, colonnes 0 et 1
+        disposition_grille.addWidget(self.aide, 5, 2, 1, 2)     # Place "aide" dans la ligne 5, colonnes 2 et 3
+
+
         self.quitter.clicked.connect(self.quitter_app)
+        self.aide.clicked.connect(self.aide_util)
 
         self.setLayout(disposition_grille)
 
@@ -68,17 +78,45 @@ class MaFenetre(QWidget):
             self.deconnexion_du_serveur()
         self.close()
 
+
+
+    def aide_util(self):
+        message_box = QMessageBox()
+        message_box.setIcon(QMessageBox.Icon.Information) 
+        message_box.setWindowTitle("Aide")             
+
+        # Définir le texte d'aide avec toutes les informations importantes
+        message_box.setText(
+            "Client PyQt6 - Connexion au Serveur\n\n"
+            "1. Connexion au serveur\n"
+            "   - Entrez l'IP et le port du serveur.\n"
+            "   - Cliquez sur 'Connexion' pour vous connecter.\n"
+            "   - Si déjà connecté, un message d'erreur s'affichera.\n\n"
+            "2. Sélection de fichier\n"
+            "   - Cliquez sur 'Sélectionner un fichier' pour choisir un fichier à envoyer.\n"
+            "   - Les formats supportés sont C, C++, Java, Python.\n\n"
+            "3. Envoi de fichier\n"
+            "   - Après la sélection, cliquez sur 'Envoyer' pour transmettre le fichier au serveur.\n\n"
+            "4. Historique des logs\n"
+            "   - Affiche les messages de connexion, déconnexion et envoi/réception de fichiers.\n\n"
+            "5. Déconnexion\n"
+            "   - Cliquez sur 'Déconnexion' pour fermer la connexion avec le serveur.\n\n"
+            "6. Quitter\n"
+            "   - Ferme l'application.\n\n"
+            "Si vous avez des questions, consultez la documentation."
+        )
+        message_box.setStandardButtons(QMessageBox.StandardButton.Ok)
+        message_box.exec()
+
     def connexion_au_serveur(self):
         ip = self.ip_input.text()
         port = self.port_input.text()
 
-        # Vérification de l'adresse IP
         ip_regex = re.compile(r"^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$")
         if not ip_regex.match(ip):
             QMessageBox.warning(self, "Erreur de syntaxe", "L'adresse IP est incorrecte.")
             return
 
-        # Vérification du port
         if not port.isdigit() or not (0 <= int(port) <= 65535):
             QMessageBox.warning(self, "Erreur de syntaxe", "Le port est incorrect.")
             return
@@ -96,9 +134,8 @@ class MaFenetre(QWidget):
             self.selection_fichier.setEnabled(True)
             self.telecharger.setEnabled(True)
 
-            # Démarrage du thread de réception
             self.recepteur_thread = QThread(self)
-            self.recepteur_thread.run = self.recevoir_donnees  # Overriding the run method
+            self.recepteur_thread.run = self.recevoir_donnees
             self.recepteur_thread.start()
 
             self.historique_logs.append(f"<span style='color: green;'>[+]</span>Connexion réussie à {ip}:{port}")
@@ -147,13 +184,13 @@ class MaFenetre(QWidget):
             return
 
         try:
-            with open(chemin_fichier, 'rb') as f:  # Ouvrir le fichier en mode binaire
+            with open(chemin_fichier, 'rb') as f:
                 fichier_nom = os.path.basename(chemin_fichier)
-                self.socket_client.sendall(fichier_nom.encode('utf-8') + b"\n")  # Envoi du nom du fichier
+                self.socket_client.sendall(fichier_nom.encode('utf-8') + b"\n")
                 contenu_fichier = f.read()
                 try:
-                    self.socket_client.sendall(contenu_fichier)  # Envoi binaire du fichier
-                    self.socket_client.sendall(b"\0")  # Signal de fin de transmission (utilisation d'un octet nul)
+                    self.socket_client.sendall(contenu_fichier)
+                    self.socket_client.sendall(b"\0")
                 except Exception as e:
                     print(f"Erreur lors de l'envoi du fichier : {e}")
                     return
@@ -170,7 +207,6 @@ class MaFenetre(QWidget):
             try:
                 donnees = self.socket_client.recv(4096).decode('utf-8')
                 if donnees:
-                    # Séparer le nom du fichier et le contenu
                     nom_fichier, contenu_fichier = donnees.split('|||', 1)
                     self.afficher_message(nom_fichier, contenu_fichier)
                 else:
@@ -184,23 +220,20 @@ class MaFenetre(QWidget):
 
         prompt = ""
         if extention == ".py":
-            prompt = f"<span style='color: blue;'>╔═[</span>user@client:~/workspace]<br><span style='color: blue;'>╚═══> $</span> python3 {nom_fichier}"
+            prompt = f"<span style='color: blue;'>╔═[</span>user@client:~/workspace]<br><span style='color: blue;'>╚═══> $</span> {nom_fichier}"
         elif extention == ".c":
-            prompt = f"<span style='color: green;'>╔═[</span>user@client:~/workspace]<br><span style='color: green;'>╚═══> $</span> gcc {nom_fichier} -o {nom_fichier.rsplit('.', 1)[0]}"
+            prompt = f"<span style='color: green;'>╔═[</span>user@client:~/workspace]<br><span style='color: green;'>╚═══> $</span> {nom_fichier}"
         elif extention == ".cpp":
-            prompt = f"<span style='color: orange;'>╔═[</span>user@client:~/workspace]<br><span style='color: purple;'>╚═══> $</span> g++ {nom_fichier} -o {nom_fichier.rsplit('.', 1)[0]}"
+            prompt = f"<span style='color: orange;'>╔═[</span>user@client:~/workspace]<br><span style='color: orange;'>╚═══> $</span> {nom_fichier}"
         elif extention == ".java":
-            prompt = f"<span style='color: red;'>╔═[</span>user@client:~/workspace]<br><span style='color: red;'>╚═══> $</span> javac {nom_fichier}"
+            prompt = f"<span style='color: red;'>╔═[</span>user@client:~/workspace]<br><span style='color: red;'>╚═══> $</span> {nom_fichier}"
 
-
-        # Stocker et afficher
         self.fichiers_recus.append(prompt)
         self.fichiers_recus.append(contenu_fichier)
         self.historique_logs.append(f"<span style='color: green;'>[+]</span> Fichier '{nom_fichier}' reçu avec succès : {nom_fichier}")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    apply_stylesheet(app)  # Apply the stylesheet
     fenetre = MaFenetre()
     fenetre.resize(800, 500)
     fenetre.show()

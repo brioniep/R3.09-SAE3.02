@@ -139,56 +139,317 @@ python3 connexion.py
 
 - [Introduction](#introduction)
 - [Options de l'Application](#options-de-lapplication)
-- [Option des serveurs maître / esclaves](#option-des-serveurs-maitre--esclaves)
+  - [🔒 Sécurité](#sécurité)
+  - [📊 Surveillance](#surveillance)
+  - [🔗 Connexion au Serveur](#connexion-au-serveur)
+  - [📁 Transfert de Fichiers](#transfert-de-fichiers)
+  - [📄 Affichage des Résultats](#affichage-des-résultats)
+- [Options des Serveurs Maître / Esclaves](#options-des-serveurs-maître--esclaves)
+  - [🔒 Sécurité](#sécurité-1)
+  - [🆔 Identification Client](#identification-client)
+  - [⚖️ Répartition des Charges](#répartition-des-charges)
+  - [🔄 Multitâches](#multitâches)
+
+---
 
 ## Introduction
-Cette application client permet de se connecter à un **serveur maître**, d'envoyer des fichiers pour traitement et de recevoir les résultats. Elle est conçue pour être simple à utiliser et offre une interface graphique conviviale. Dans cette documentation utilisateur, vous aurez une explication simple du projet, de ses fonctionnalités et de son fonctionnement. Si vous souhaitez avoir une analyse plus poussée du projet, je vous invite à vous rendre sur la [documentation développeur](#documentation-Développeur). Cette documentation reprendra les memes aspect que la documentation utilisateur mais en y ajoutant les techniques utiliser et la méchanique du code.
+
+Cette application client se connecte à un **serveur maître** pour envoyer des fichiers à traiter et recevoir les résultats. Elle propose une interface graphique conviviale et simple d’utilisation. 
+
+Ce guide présente les fonctionnalités principales et le fonctionnement de l'application. Si vous souhaitez une analyse technique plus approfondie, consultez la [documentation développeur](#documentation-développeur).
+
+---
 
 ## Options de l'Application
 
-- **🔒 Sécurité** : L'accès à la page `index.py` pour envoyer des fichiers aux serveurs ne s'ouvre qu'après s'être authentifié.
+### 🔒 Sécurité
+L'accès à la fonctionnalité de transfert de fichiers (via `index.py`) est protégé par un système d'authentification. Vous devez vous connecter avant de pouvoir envoyer des fichiers aux serveurs.
 
-- **📊 Surveillance** : L'application est dotée d'une partie de log pour permettre à l'utilisateur de contrôler ses actions dans l'application, savoir si la connexion avec le serveur maître est établie, si la connexion est rompue à n'importe quel moment, savoir si son fichier a bien été envoyé, etc.
+### 📊 Surveillance
+L'application dispose d'une fonctionnalité de journalisation (logs) permettant :
+- De suivre vos actions dans l'application.
+- De vérifier l'état de la connexion avec le serveur maître.
+- De recevoir des notifications en cas de déconnexion ou d'échec d'envoi des fichiers.
 
-- **🔗 Connexion au serveur** : L'application dispose d'une connexion renforcée avec le serveur permettant de vérifier la connexion avec le serveur maître toutes les 5 secondes. Si la connexion est rompue, un message d'erreur s'affichera dans les logs.
+### 🔗 Connexion au Serveur
+L'application effectue une vérification continue de la connexion avec le serveur maître toutes les 5 secondes. Si la connexion est rompue, un message d'erreur s'affichera dans les logs.
 
-- **📁 Transfert de fichier** : Cette fonctionnalité ne s'active que quand la connexion est établie avec le serveur maître. Si l'utilisateur sélectionne un fichier autre que C, C++, Java ou Python, alors un message s'affiche en indiquant que le fichier n'est pas conforme.
+### 📁 Transfert de Fichiers
+- Cette fonctionnalité ne s'active que si la connexion avec le serveur maître est établie.
+- Seuls les fichiers au format C, C++, Java ou Python sont acceptés. Un message d'erreur s'affiche si un fichier non conforme est sélectionné.
 
-- **📄 Affichage résultat** : Une fois le résultat reçu, il s'affichera dans la partie droite de l'application avec le nom du fichier ainsi que le résultat d'exécution. Un résultat s'affichera toujours même en cas d'erreur dans le code afin de permettre à l'utilisateur de corriger son code.
+### 📄 Affichage des Résultats
+Une fois le traitement terminé, les résultats s’affichent dans la partie droite de l’interface avec :
+- Le nom du fichier.
+- Les résultats d'exécution, même en cas d'erreur dans le code, pour permettre une correction.
 
-## Option des serveurs maître / esclaves
+---
 
-- **🔒 Sécurité** : Les serveurs esclaves sont les seul a etre dans un conteneur, le server-maitre lui n'est pas dans un conteneur. Mais les serveur esclaves sont aussi les seuls a pouvoir executer du code, et il n'on pas accès a la machine hote ce qui veut dire que cela diminue les risque lors de l'execution des fichiers.
+## Options des Serveurs Maître / Esclaves
 
-- **🆔 Identification client** : Dès qu'une connexion est établie avec un client, le serveur maître lui attribue immédiatement un identifiant unique permettant une meilleure traçabilité des fichiers. Ce qui permet donc de renvoyer le résultat d'un fichier de manière rapide et fiable.
+### 🔒 Sécurité
+- Les serveurs esclaves sont isolés dans des conteneurs, tandis que le serveur maître ne l’est pas.
+- Les serveurs esclaves exécutent le code sans accès à la machine hôte, ce qui réduit les risques en cas de fichiers malveillants.
 
-- **⚖️ Répartition des charges** : Le serveur maître est chargé de répartir les fichiers vers les 4 serveurs esclaves. Chaque esclave a la capacité de compiler et exécuter les 4 langages pour permettre une meilleure disponibilité. Le serveur maître répartit la charge en deux temps :
+### 🆔 Identification Client
+Lorsqu'un client se connecte, le serveur maître lui attribue un identifiant unique. Cela permet :
+- Une meilleure traçabilité des fichiers.
+- Un retour rapide et fiable des résultats.
 
-1. Premièrement, il vérifie le type de fichier. Si c'est un fichier Python, il va prioriser l'envoi vers le serveur 1, sinon si le fichier est un fichier C, alors il va prioriser l'envoi vers le serveur 2, etc. Voici les priorités de langage des serveurs esclaves :
-    - **Serveur-esclave-1** : Fichier Python
-    - **Serveur-esclave-2** : Fichier C
-    - **Serveur-esclave-3** : Fichier C++
-    - **Serveur-esclave-4** : Fichier Java
+### ⚖️ Répartition des Charges
+Le serveur maître répartit les fichiers vers les serveurs esclaves selon deux critères :
+1. **Type de fichier** :
+   - **Serveur-esclave-1** : Fichiers Python.
+   - **Serveur-esclave-2** : Fichiers C.
+   - **Serveur-esclave-3** : Fichiers C++.
+   - **Serveur-esclave-4** : Fichiers Java.
+   
+2. **Utilisation de la RAM** :
+   - Si la RAM d'un serveur esclave dépasse 60%, le serveur maître redirige le fichier vers un autre serveur disponible.
+   - Si tous les serveurs sont surchargés, le fichier est envoyé selon la priorité de langage.
 
-2. Deuxièmement, il vérifie la RAM en temps réel des conteneurs. C'est-à-dire que le serveur maître va regarder le type de fichier, si c'est un fichier Python, il va regarder la RAM du conteneur esclave 1, si elle dépasse 60%, alors il regarde si le conteneur esclave 2 ne dépasse pas les 60% de RAM et ainsi de suite. Si tous les conteneurs esclaves sont tous surchargés, alors il envoie le fichier par la priorité de langage.
+Cette double répartition optimise la charge des serveurs et évite les surcharges inutiles.
 
-Cette méthode permet de répartir efficacement les charges en deux temps, permettant de répartir une première fois de manière générale par le type de fichier puis de manière plus précise avec la RAM permettant aux serveurs surchargés de ne pas l'être davantage.
+### 🔄 Multitâches
+Le serveur maître est divisé en deux fonctions principales :
+1. Réception des fichiers des clients et envoi vers les serveurs esclaves.
+2. Réception des résultats des serveurs esclaves et renvoi vers les clients.
 
-- **🔄 Multitâches** : Le serveur maître se décompose en deux parties, une partie qui reçoit les fichiers des clients et qui les envoie aux serveurs selon la répartition de charge détaillée ci-dessus. Puis une deuxième partie qui va réceptionner les fichiers exécutés des serveurs et les renvoyer aux clients. Les serveurs esclaves peuvent eux aussi exécuter et renvoyer des fichiers en simultané.
+Les serveurs esclaves peuvent traiter et retourner plusieurs fichiers simultanément, garantissant un fonctionnement fluide et rapide.
 
-
-
-# Documentation Développeur
-
-### Table des matières
-
-- [Introduction](#introduction)
-- [Options de l'Application](#options-de-lapplication)
-- [Option des serveurs maître / esclaves](#option-des-serveurs-maitre--esclaves)
-
-## Introduction
-Cette application client permet de se connecter à un **serveur maître**, d'envoyer des fichiers pour traitement et de recevoir les résultats. Elle est conçue pour être simple à utiliser et offre une interface graphique conviviale. Dans cette documentation développeur, vous aurez une explication détaillé du projet, les méthodes utiliser pour parvenir au résultat ainsi que la méchanique du code, que ce soit pour le client ou pour les serveurs. 
+---
 
 
-## Options de l'Application
+
+
+
+
+
+
+
+
+
+
+
+# Documentation Développeur 📚
+
+### Table des matières 📑
+
+- [Structure du Projet 🏗️](#structure-du-projet-)
+- [Fonctionnalités Principales 🌟](#fonctionnalités-principales-)
+    - [Connexion au Serveur 🔗](#connexion-au-serveur-)
+    - [Transfert de Fichiers 📁](#transfert-de-fichiers-)
+    - [Réception de Données 📥](#réception-de-données-)
+    - [Affichage des Résultats 📄](#affichage-des-résultats-)
+- [Serveur Maître 🖥️](#serveur-maître-)
+    - [Gestion des Clients 👥](#gestion-des-clients-)
+    - [Répartition des Charges ⚖️](#répartition-des-charges-)
+- [Serveurs Esclaves 🛠️](#serveurs-esclaves-)
+- [Sécurité 🔒](#sécurité-)
+- [Ressources Complémentaires 📚](#ressources-complémentaires-)
+
+---
+
+## Structure du Projet 🏗️
+
+Le projet est divisé en plusieurs dossiers et fichiers principaux :
+
+- `CLIENT-GUI/` : Contient le code source de l'application client avec l'interface graphique.
+- `SERVER-FILE/` : Contient le code source du serveur maître et des serveurs esclaves.
+- `README.md` : Documentation du projet.
+
+---
+
+## Fonctionnalités Principales 🌟
+
+### Connexion au Serveur 🔗
+
+La connexion au serveur est gérée par la méthode `connexion_au_serveur` dans `CLIENT-GUI/index.py` :
+
+```py
+def connexion_au_serveur(self):
+        ip = self.ip_input.text()
+        port = self.port_input.text()
+
+        ip_regex = re.compile(r"^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$")
+        if not ip_regex.match(ip):
+                QMessageBox.warning(self, "Erreur de syntaxe", "L'adresse IP est incorrecte.")
+                return
+
+        if not port.isdigit() or not (0 <= int(port) <= 65535):
+                QMessageBox.warning(self, "Erreur de syntaxe", "Le port est incorrect.")
+                return
+
+        port = int(port)
+
+        if self.est_connecte:
+                self.historique_logs.append("<span style='color: red;'>[-]</span> Déjà connecté au serveur.")
+                return
+
+        try:
+                self.socket_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                self.socket_client.connect((ip, port))
+                self.est_connecte = True
+                self.selection_fichier.setEnabled(True)
+                self.telecharger.setEnabled(True)
+
+                self.recepteur_thread = QThread(self)
+                self.recepteur_thread.run = self.recevoir_donnees
+                self.recepteur_thread.start()
+
+                self.historique_logs.append(f"<span style='color: green;'>[+]</span>Connexion réussie à {ip}:{port}")
+
+        except Exception as e:
+                self.historique_logs.append(f"<span style='color: red;'>[-]</span> Erreur lors de la connexion : {e}")
+                print(f"[-] Erreur lors de la connexion : {e}")
+```
+
+### Transfert de Fichiers 📁
+
+Le transfert de fichiers est géré par la méthode `envoyer_fichier` dans `CLIENT-GUI/index.py` :
+
+```py
+def envoyer_fichier(self):
+        if not self.est_connecte:
+                self.historique_logs.append("<span style='color: red;'>[-] Erreur : </span>Pas de connexion au serveur.")
+                return
+        chemin_fichier = self.chemin.text()
+
+        if not chemin_fichier ou not os.path.isfile(chemin_fichier):
+                self.historique_logs.append("<span style='color: red;'>[-] Erreur : </span>Aucun fichier valide sélectionné.")
+                return
+
+        try:
+                with open(chemin_fichier, 'rb') as f:
+                        fichier_nom = os.path.basename(chemin_fichier)
+                        self.socket_client.sendall(fichier_nom.encode('utf-8') + b"\n")
+                        contenu_fichier = f.read()
+                        try:
+                                self.socket_client.sendall(contenu_fichier)
+                                self.socket_client.sendall(b"\0")
+                        except Exception as e:
+                                print(f"Erreur lors de l'envoi du fichier : {e}")
+                                return
+
+                fichier_nom = os.path.basename(chemin_fichier)
+                self.historique_logs.append(f"<span style='color: green;'>[+]</span> Fichier '{fichier_nom}' envoyé avec succès.")
+                self.chemin.clear()
+
+        except Exception as e:
+                self.historique_logs.append(f"<span style='color: red;'>Erreur</span> : lors de l'envoi du fichier : {e}")
+```
+
+### Réception de Données 📥
+
+La réception des données est gérée par la méthode `recevoir_donnees` dans `CLIENT-GUI/index.py` :
+
+```py
+def recevoir_donnees(self):
+        while self.est_connecte:
+                try:
+                        donnees = self.socket_client.recv(4096).decode('utf-8')
+                        if donnees:
+                                nom_fichier, contenu_fichier = donnees.split('|||', 1)
+                                self.afficher_message(nom_fichier, contenu_fichier)
+                        else:
+                                break
+                except Exception as e:
+                        print(f"Erreur de réception : {e}")
+                        break
+```
+
+### Affichage des Résultats 📄
+
+L'affichage des résultats est géré par la méthode `afficher_message` dans `CLIENT-GUI/index.py` :
+
+```py
+def afficher_message(self, nom_fichier, contenu_fichier):
+        extention = os.path.splitext(nom_fichier)[1]
+
+        prompt = ""
+        if extention == ".py":
+                prompt = f"<span style='color: blue;'>╔═[</span>user@client:~/workspace]<br><span style='color: blue;'>╚═══> $</span> {nom_fichier}"
+        elif extention == ".c":
+                prompt = f"<span style='color: green;'>╔═[</span>user@client:~/workspace]<br><span style='color: green;'>╚═══> $</span> {nom_fichier}"
+        elif extention == ".cpp":
+                prompt = f"<span style='color: orange;'>╔═[</span>user@client:~/workspace]<br><span style='color: orange;'>╚═══> $</span> {nom_fichier}"
+        elif extention == ".java":
+                prompt = f"<span style='color: red;'>╔═[</span>user@client:~/workspace]<br><span style='color: red;'>╚═══> $</span> {nom_fichier}"
+
+        self.fichiers_recus.append(prompt)
+        self.fichiers_recus.append(contenu_fichier)
+        self.historique_logs.append(f"<span style='color: green;'>[+]</span> Fichier '{nom_fichier}' reçu avec succès : {nom_fichier}")
+```
+
+---
+
+## Serveur Maître 🖥️
+
+### Gestion des Clients 👥
+
+La gestion des clients est gérée par la méthode `gestion_client` dans `SERVER-FILE/server-maitre/server.py` :
+
+```py
+def gestion_client(self, socket_client, adresse_client):
+        id_client = threading.get_ident()
+        self.clients[id_client] = socket_client 
+        print(f"[+] Client {adresse_client} connecté avec ID {id_client}.")
+
+        try:
+                while True:
+                        nom_fichier = socket_client.recv(1024).decode('utf-8').strip()
+                        if not nom_fichier:
+                                break
+
+                        contenu_fichier = b""
+                        while True:
+                                donnees = socket_client.recv(1024)
+                                if not donnees:
+                                        break
+                                contenu_fichier += donnees
+                                if b"\x00" in donnees:
+                                        break
+
+                        if contenu_fichier.endswith(b'\x00'):
+                                contenu_fichier = contenu_fichier[:-1]
+
+                        contenu_fichier_str = contenu_fichier.decode('utf-8', errors='replace')
+
+                        fichier_info = [id_client, nom_fichier, contenu_fichier_str]
+                        print(f"[Client-{id_client}] Liste créée : {fichier_info}")
+
+                        self.choix_esclave(fichier_info)
+
+        except Exception as e:
+                print(f"[-] Erreur avec le client-{id_client}: {e}")
+        finally:
+                del self.clients[id_client]
+                socket_client.close()
+                print(f"[-] Client {id_client} déconnecté.")
+```
+
+### Répartition des Charges ⚖️
+
+La répartition des charges est gérée par la méthode `choix_esclave` dans `SERVER-FILE/server-maitre/server.py` :
+
+```py
+def choix_esclave(self, fichier_info):
+        # Logique de répartition des charges basée sur le type de fichier et l'utilisation de la RAM
+        pass
+```
+
+---
+
+## Serveurs Esclaves 🛠️
+
+Les serveurs esclaves sont responsables de l'exécution des fichiers reçus du serveur maître. Chaque serveur esclave est isolé dans un conteneur Docker pour des raisons de sécurité et de gestion des ressources.
+
+---
+
+## Sécurité 🔒
+
+- Les serveurs esclaves sont isolés dans des conteneurs Docker pour éviter tout accès non autorisé à la machine hôte.
+- Le serveur maître gère les connexions des clients et répartit les fichiers aux serveurs esclaves en fonction de leur type et de l'utilisation de la RAM.
+
+---
 
