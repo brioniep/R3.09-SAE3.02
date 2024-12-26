@@ -1,7 +1,4 @@
-import os
-import socket
-import threading
-import subprocess
+import os , socket , threading , subprocess
 
 class ServeurEsclave:
 
@@ -13,11 +10,11 @@ class ServeurEsclave:
         self.socket_esclave.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.socket_esclave.bind(('0.0.0.0', self.port_esclave))
         self.socket_esclave.listen(5)
-        print(f"Serveur esclave en écoute sur le port {self.port_esclave}...")
+        print(f"[+] Serveur esclave en écoute sur le port {self.port_esclave}...")
 
         while True:
             client_socket, client_address = self.socket_esclave.accept()
-            print(f"Connexion acceptée du server maitre : {client_address}")
+            print(f"[+] Connexion acceptée du server maitre : {client_address}")
             t1 = threading.Thread(target=self.reception_fichier, args=(client_socket,))
             t1.start()
 
@@ -25,22 +22,22 @@ class ServeurEsclave:
         try:
             donnees = client_socket.recv(4096).decode('utf-8')
             if not donnees:
-                print("Aucune donnée reçue.")
+                print("[-] Aucune donnée reçue.")
                 return
 
             fichier_info = donnees.split('|', 2)
             if len(fichier_info) != 3:
-                print("Données reçues incorrectes.")
+                print("[-] Données reçues incorrectes.")
                 return
 
             id_client, nom_fichier, contenu_fichier = fichier_info
-            print(f"[RECEPTION] ID Client: {id_client}, Nom du fichier: {nom_fichier}")
-            print(f"[RECEPTION] Contenu du fichier:\n{contenu_fichier}")
+            print(f"[+] ID Client: {id_client}, Nom du fichier: {nom_fichier}")
+            print(f"[+] Contenu du fichier:\n{contenu_fichier}")
 
             self.enregistrement_fichier(id_client, nom_fichier, contenu_fichier)
 
         except Exception as e:
-            print(f"[-] Erreur lors de la réception du fichier: {e}")
+            print(f"[!] Erreur lors de la réception du fichier: {e}")
 
     def enregistrement_fichier(self, id_client, nom_fichier, contenu_fichier):
         try:
@@ -52,14 +49,14 @@ class ServeurEsclave:
             with open(chemin_fichier, 'w') as f:
                 f.write(contenu_fichier)
 
-            print(f"[ENREGISTREMENT] Fichier enregistré dans {chemin_fichier}")
+            print(f"[+] Fichier enregistré dans {chemin_fichier}")
 
             _, extension = os.path.splitext(nom_fichier)
 
             self.résultat_execution(chemin_fichier, extension)
 
         except Exception as e:
-            print(f"[-] Erreur lors de l'enregistrement du fichier: {e}")
+            print(f"[!] Erreur lors de l'enregistrement du fichier: {e}")
 
 
 
@@ -68,7 +65,7 @@ class ServeurEsclave:
     def résultat_execution(self, fichier_path, extension):
         try:
             result = ""
-            print(f"Exécution du fichier avec extension {extension}: {fichier_path}")
+            print(f"[+] Exécution du fichier avec extension {extension}: {fichier_path}")
 
             if extension == ".py":
                 result = self.executer_python(fichier_path)
@@ -81,7 +78,7 @@ class ServeurEsclave:
             else:
                 result = "Type de fichier non pris en charge."
 
-            print(f"Résultat de l'exécution: {result}")
+            print(f"[+] Résultat de l'exécution: {result}")
 
             # Extraire les informations nécessaires à partir du chemin du fichier
             id_client = os.path.basename(os.path.dirname(fichier_path))
@@ -93,46 +90,46 @@ class ServeurEsclave:
             return result
 
         except Exception as e:
-            print(f"[-] Erreur lors de l'exécution : {e}")
+            print(f"[!] Erreur lors de l'exécution : {e}")
             return f"Erreur : {e}"
 
     def executer_python(self, fichier_path):
         try:
-            print(f"Exécution du fichier Python: {fichier_path}")
+            print(f"[-] Exécution du fichier Python: {fichier_path}")
             
             result = subprocess.run(['python3', fichier_path], capture_output=True, text=True)
             
             if result.returncode != 0:
-                print(f"Erreur d'exécution Python : {result.stderr}")
-                return f"Erreur d'exécution Python : {result.stderr}"
+                print(f"[!] Erreur d'exécution Python : {result.stderr}")
+                return f"[!] Erreur d'exécution Python : {result.stderr}"
             
             print(f"Sortie d'exécution Python : {result.stdout}")
             return result.stdout
         except Exception as e:
-            print(f"Erreur lors de l'exécution Python : {e}")
-            return f"Erreur d'exécution Python : {e}"
+            print(f"[!] Erreur lors de l'exécution Python : {e}")
+            return f"[!] Erreur d'exécution Python : {e}"
 
     def compiler_et_executer_c(self, fichier_path):
         try:
             output = subprocess.run(['gcc', fichier_path, '-o', 'a.out'], capture_output=True, text=True)
             if output.returncode != 0:
-                return f"Erreur de compilation C : {output.stderr}"
+                return f"[!] Erreur de compilation C : {output.stderr}"
 
             result = subprocess.run(['./a.out'], capture_output=True, text=True)
             return result.stdout if result.returncode == 0 else result.stderr
         except Exception as e:
-            return f"Erreur d'exécution C : {e}"
+            return f"[!] Erreur d'exécution C : {e}"
 
     def compiler_et_executer_cpp(self, fichier_path):
         try:
             output = subprocess.run(['g++', fichier_path, '-o', 'a.out'], capture_output=True, text=True)
             if output.returncode != 0:
-                return f"Erreur de compilation C++ : {output.stderr}"
+                return f"[!] Erreur de compilation C++ : {output.stderr}"
 
             result = subprocess.run(['./a.out'], capture_output=True, text=True)
             return result.stdout if result.returncode == 0 else result.stderr
         except Exception as e:
-            return f"Erreur d'exécution C++ : {e}"
+            return f"[!] Erreur d'exécution C++ : {e}"
 
     def compiler_et_executer_java(self, fichier_path):
         try:
@@ -141,17 +138,17 @@ class ServeurEsclave:
             
             output = subprocess.run(['javac', fichier_path], capture_output=True, text=True, cwd=directory)
             if output.returncode != 0:
-                return f"Erreur de compilation Java : {output.stderr}"
+                return f"[!] Erreur de compilation Java : {output.stderr}"
 
             class_file = os.path.join(directory, f'{class_name}.class')
             if not os.path.exists(class_file):
-                return f"Erreur : le fichier {class_file} n'a pas été généré."
+                return f"[!] Erreur : le fichier {class_file} n'a pas été généré."
 
             result = subprocess.run(['java', '-cp', directory, class_name], capture_output=True, text=True)
 
             return result.stdout if result.returncode == 0 else result.stderr
         except Exception as e:
-            return f"Erreur d'exécution Java : {e}"
+            return f"[!] Erreur d'exécution Java : {e}"
 
 
 
@@ -164,9 +161,9 @@ class ServeurEsclave:
                 s.connect(('172.17.0.1', 5555))
                 message = f"{id_client}|{nom_fichier}|{resultat_execution}"
                 s.sendall(message.encode('utf-8'))
-                print(f"Message envoyé au serveur maître: {message}")
+                print(f"[+] Message envoyé au serveur maître: {message}")
         except Exception as e:
-            print(f"[-] Erreur lors de l'envoi au serveur maître: {e}")
+            print(f"[!] Erreur lors de l'envoi au serveur maître: {e}")
 
 
 
@@ -177,14 +174,11 @@ class ServeurEsclave:
             dossier_client = os.path.dirname(fichier_path)
             if os.path.exists(dossier_client):
                 subprocess.run(['rm', '-rf', dossier_client])
-                print(f"Dossier supprimé : {dossier_client}")
+                print(f"[-] Dossier supprimé : {dossier_client}")
             else:
-                print(f"Le dossier {dossier_client} n'existe pas.")
+                print(f"[-] Le dossier {dossier_client} n'existe pas.")
         except Exception as e:
-            print(f"[-] Erreur lors de la suppression du dossier : {e}")
-
-
-
+            print(f"[!] Erreur lors de la suppression du dossier : {e}")
 
 
 if __name__ == "__main__":

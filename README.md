@@ -434,7 +434,7 @@ La répartition des charges est gérée par la méthode `choix_esclave` dans `SE
 ```py
 def choix_esclave(self, fichier_info):
         # Logique de répartition des charges basée sur le type de fichier et l'utilisation de la RAM
-        pass
+        pass 
 ```
 
 ---
