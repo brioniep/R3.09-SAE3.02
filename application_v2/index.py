@@ -104,16 +104,9 @@ class MaFenetre(QWidget):
             "6. Quitter\n"
             "   - Ferme l'application.\n\n"
             "Si vous avez des questions, consultez la documentation."
-        ) 
-
-        # Ajouter un bouton "Ok"
+        )
         message_box.setStandardButtons(QMessageBox.StandardButton.Ok)
-        
-        # Afficher le message
         message_box.exec()
-
-
-
 
     def connexion_au_serveur(self):
         ip = self.ip_input.text()
