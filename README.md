@@ -24,10 +24,10 @@ Ce README est divisé en trois grandes parties :
 
 ### Table des matières
 
-- [Installation des dépendances 🚀](#installation-des-dépendances-)
-- [Mise en place des fichiers sur le serveur Linux 📂](#mise-en-place-des-fichiers-sur-le-serveur-linux-)
-- [Construction des conteneurs 🛠️](#construction-des-conteneurs-)
-- [Lancement des serveurs 🚀](#lancement-des-serveurs-)
+- [Installation des dépendances 🚀](#installation-des-dépendances-🚀)
+- [Mise en place des fichiers sur le serveur Linux 📂](#mise-en-place-des-fichiers-sur-le-serveur-linux-📂)
+- [Construction des conteneurs 🛠️](#construction-des-conteneurs-🛠️)
+- [Lancement des serveurs 🚀](#lancement-des-serveurs-🚀)
 - [Lancement du client](#lancement-du-client)
 
 ## Installation des dépendances 🚀
@@ -139,16 +139,16 @@ python3 connexion.py
 
 - [Introduction](#introduction)
 - [Options de l'Application](#options-de-lapplication)
-  - [🔒 Sécurité](#sécurité)
-  - [📊 Surveillance](#surveillance)
-  - [🔗 Connexion au Serveur](#connexion-au-serveur)
-  - [📁 Transfert de Fichiers](#transfert-de-fichiers)
-  - [📄 Affichage des Résultats](#affichage-des-résultats)
+    - [🔒 Sécurité](#-sécurité)
+    - [📊 Surveillance](#-surveillance)
+    - [🔗 Connexion au Serveur](#-connexion-au-serveur)
+    - [📁 Transfert de Fichiers](#-transfert-de-fichiers)
+    - [📄 Affichage des Résultats](#-affichage-des-résultats)
 - [Options des Serveurs Maître / Esclaves](#options-des-serveurs-maître--esclaves)
-  - [🔒 Sécurité](#sécurité-1)
-  - [🆔 Identification Client](#identification-client)
-  - [⚖️ Répartition des Charges](#répartition-des-charges)
-  - [🔄 Multitâches](#multitâches)
+    - [🔒 Sécurité](#-sécurité-1)
+    - [🆔 Identification Client](#-identification-client)
+    - [⚖️ Répartition des Charges](#-répartition-des-charges)
+    - [🔄 Multitâches](#-multitâches)
 
 ---
 
@@ -237,16 +237,15 @@ Les serveurs esclaves peuvent traiter et retourner plusieurs fichiers simultané
 
 - [Structure du Projet 🏗️](#structure-du-projet-)
 - [Fonctionnalités Principales 🌟](#fonctionnalités-principales-)
-    - [Connexion au Serveur 🔗](#connexion-au-serveur-)
-    - [Transfert de Fichiers 📁](#transfert-de-fichiers-)
-    - [Réception de Données 📥](#réception-de-données-)
-    - [Affichage des Résultats 📄](#affichage-des-résultats-)
-- [Serveur Maître 🖥️](#serveur-maître-)
-    - [Gestion des Clients 👥](#gestion-des-clients-)
-    - [Répartition des Charges ⚖️](#répartition-des-charges-)
-- [Serveurs Esclaves 🛠️](#serveurs-esclaves-)
-- [Sécurité 🔒](#sécurité-)
-- [Ressources Complémentaires 📚](#ressources-complémentaires-)
+    - [Connexion au Serveur 🔗](#connexion-au-serveur-🔗)
+    - [Transfert de Fichiers 📁](#transfert-de-fichiers-📁)
+    - [Réception de Données 📥](#réception-de-données-📥)
+    - [Affichage des Résultats 📄](#affichage-des-résultats-📄)
+- [Serveur Maître 🖥️](#serveur-maître-🖥️)
+    - [Gestion des Clients 👥](#gestion-des-clients-👥)
+    - [Répartition des Charges ⚖️](#répartition-des-charges-⚖️)
+- [Serveurs Esclaves 🛠️](#serveurs-esclaves-🛠️)
+- [Sécurité 🔒](#sécurité-🔒)
 
 ---
 
@@ -449,7 +448,6 @@ Les serveurs esclaves sont responsables de l'exécution des fichiers reçus du s
 ## Sécurité 🔒
 
 - Les serveurs esclaves sont isolés dans des conteneurs Docker pour éviter tout accès non autorisé à la machine hôte.
-- Le serveur maître gère les connexions des clients et répartit les fichiers aux serveurs esclaves en fonction de leur type et de l'utilisation de la RAM.
 
 ---
 
