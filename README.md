@@ -55,6 +55,9 @@ Téléchargez la version stable de Docker Compose sur le serveur :
 sudo apt install docker-compose
 ```
 
+
+
+
 ### Python et librairies nécessaires 🐍
 
 Cette partie est à faire chez le client. Pour installer Python et les librairies nécessaires au projet, suivez ces étapes :
@@ -91,15 +94,24 @@ Pour construire et démarrer les conteneurs, utilisez la commande suivante dans 
 ```bash
 docker-compose up --build
 ```
-> ⚠️ **Avertissement** : cette commande peut mettre quelques minutes à s'exécuter dû à l'installation de 16 paquets.
+> ⚠️ **Avertissement** : cette commande peut mettre quelques minutes à s'exécuter dû à l'installation de 16 paquets. Si un problème survient pendant l'installation (par exemple, si vous avez interrompu le processus avec `Ctrl+C`), il est recommandé de supprimer les conteneurs avant de relancer la commande ci-dessus. Utilisez les commandes suivantes pour nettoyer votre environnement Docker :
 
-
+```bash
+docker-compose down
+docker-compose down --volumes
+docker-compose down --rmi all
+docker system prune -a --volumes
+```
 ## Lancement des serveurs 🚀
 
 Pour lancer les serveurs esclaves, utilisez la commande suivante dans le répertoire `SERVER-FILE` :
+
+> **Note** : Si vous avez déjà exécuté la commande `docker-compose up --build` juste avant, il n'est pas nécessaire de relancer cette commande.
 ```bash
 docker-compose up
 ```
+
+
 
 Pour lancer le serveur maître, utilisez la commande suivante dans le répertoire `SERVER-FILE/server-maitre/` :
 ```bash
@@ -109,8 +121,16 @@ python3 server.py
 ## Lancement du client
 Pour lancer l'application client, utilisez la commande suivante adns le répertoire  `CLIENT-GUI` :
 ```bash
-python3 index.py
+python3 connexion.py
 ```
+
+> **Note** : Le nom d'utilisateur par défaut est "toto" et le mot de passe par défaut est également "toto". Si vous avez besoin de changer ces identifiants, veuillez consulter la documentation développeur.
+
+
+
+
+
+
 
 
 # Documentation Utilisateur
@@ -167,45 +187,8 @@ Cette méthode permet de répartir efficacement les charges en deux temps, perme
 - [Option des serveurs maître / esclaves](#option-des-serveurs-maitre--esclaves)
 
 ## Introduction
-Cette application client permet de se connecter à un **serveur maître**, d'envoyer des fichiers pour traitement et de recevoir les résultats. Elle est conçue pour être simple à utiliser et offre une interface graphique conviviale. Dans cette documentation développeur, vous aurez une explication détaillé du projet, les méthodes utiliser pour parvenir au résultat ainsi que la méchanique du code, que ce soit pour le client ou pour les serveurs.
+Cette application client permet de se connecter à un **serveur maître**, d'envoyer des fichiers pour traitement et de recevoir les résultats. Elle est conçue pour être simple à utiliser et offre une interface graphique conviviale. Dans cette documentation développeur, vous aurez une explication détaillé du projet, les méthodes utiliser pour parvenir au résultat ainsi que la méchanique du code, que ce soit pour le client ou pour les serveurs. 
 
 
 ## Options de l'Application
 
-- **🔒 Sécurité** : L'accès à la page `index.py` pour envoyer des fichiers aux serveurs ne s'ouvre qu'après s'être authentifié.
-
-- **📊 Surveillance** : L'application est dotée d'une partie de log pour permettre à l'utilisateur de contrôler ses actions dans l'application, savoir si la connexion avec le serveur maître est établie, si la connexion est rompue à n'importe quel moment, savoir si son fichier a bien été envoyé, etc. Cette partie a été réalisé en Readonly ce qui permet de ne pas etre modifiable par l'utilisateur : 
-```python
-    self.historique_logs = QTextEdit()
-    self.historique_logs.setReadOnly(True)
-```
-
-- **🔗 Connexion au serveur** : L'application dispose d'une connexion renforcée avec le serveur permettant de vérifier la connexion avec le serveur maître toutes les 5 secondes. Si la connexion est rompue, un message d'erreur s'affichera dans les logs. La connexion au serveur se fait via socket et prend l'input : ip_input et port_input pour se connecter : 
-
-
-
-
-
-- **📁 Transfert de fichier** : Cette fonctionnalité ne s'active que quand la connexion est établie avec le serveur maître. Si l'utilisateur sélectionne un fichier autre que C, C++, Java ou Python, alors un message s'affiche en indiquant que le fichier n'est pas conforme.
-
-- **📄 Affichage résultat** : Une fois le résultat reçu, il s'affichera dans la partie droite de l'application avec le nom du fichier ainsi que le résultat d'exécution. Un résultat s'affichera toujours même en cas d'erreur dans le code afin de permettre à l'utilisateur de corriger son code.
-
-## Option des serveurs maître / esclaves
-
-- **🔒 Sécurité** : Les serveurs esclaves sont les seul a etre dans un conteneur, le server-maitre lui n'est pas dans un conteneur. Mais les serveur esclaves sont aussi les seuls a pouvoir executer du code, et il n'on pas accès a la machine hote ce qui veut dire que cela diminue les risque lors de l'execution des fichiers.
-
-- **🆔 Identification client** : Dès qu'une connexion est établie avec un client, le serveur maître lui attribue immédiatement un identifiant unique permettant une meilleure traçabilité des fichiers. Ce qui permet donc de renvoyer le résultat d'un fichier de manière rapide et fiable.
-
-- **⚖️ Répartition des charges** : Le serveur maître est chargé de répartir les fichiers vers les 4 serveurs esclaves. Chaque esclave a la capacité de compiler et exécuter les 4 langages pour permettre une meilleure disponibilité. Le serveur maître répartit la charge en deux temps :
-
-1. Premièrement, il vérifie le type de fichier. Si c'est un fichier Python, il va prioriser l'envoi vers le serveur 1, sinon si le fichier est un fichier C, alors il va prioriser l'envoi vers le serveur 2, etc. Voici les priorités de langage des serveurs esclaves :
-    - **Serveur-esclave-1** : Fichier Python
-    - **Serveur-esclave-2** : Fichier C
-    - **Serveur-esclave-3** : Fichier C++
-    - **Serveur-esclave-4** : Fichier Java
-
-2. Deuxièmement, il vérifie la RAM en temps réel des conteneurs. C'est-à-dire que le serveur maître va regarder le type de fichier, si c'est un fichier Python, il va regarder la RAM du conteneur esclave 1, si elle dépasse 60%, alors il regarde si le conteneur esclave 2 ne dépasse pas les 60% de RAM et ainsi de suite. Si tous les conteneurs esclaves sont tous surchargés, alors il envoie le fichier par la priorité de langage.
-
-Cette méthode permet de répartir efficacement les charges en deux temps, permettant de répartir une première fois de manière générale par le type de fichier puis de manière plus précise avec la RAM permettant aux serveurs surchargés de ne pas l'être davantage.
-
-- **🔄 Multitâches** : Le serveur maître se décompose en deux parties, une partie qui reçoit les fichiers des clients et qui les envoie aux serveurs selon la répartition de charge détaillée ci-dessus. Puis une deuxième partie qui va réceptionner les fichiers exécutés des serveurs et les renvoyer aux clients. Les serveurs esclaves peuvent eux aussi exécuter et renvoyer des fichiers en simultané.
