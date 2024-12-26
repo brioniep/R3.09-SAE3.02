@@ -42,6 +42,8 @@ class MaFenetre(QWidget):
         self.historique_logs.setReadOnly(True)
 
         self.quitter = QPushButton("Quitter")
+        self.aide = QPushButton("Aide ?")
+
 
         disposition_grille.addWidget(self.ip, 0, 0)
         disposition_grille.addWidget(self.ip_input, 0, 1)
@@ -56,8 +58,12 @@ class MaFenetre(QWidget):
         disposition_grille.addWidget(self.chemin, 1, 2, 1, 2)
         disposition_grille.addWidget(self.fichiers_recus, 2, 2, 3, 2)
 
-        disposition_grille.addWidget(self.quitter, 5, 0, 1, 4)
+        disposition_grille.addWidget(self.quitter, 5, 0, 1, 2)  # Place "quitter" dans la ligne 5, colonnes 0 et 1
+        disposition_grille.addWidget(self.aide, 5, 2, 1, 2)     # Place "aide" dans la ligne 5, colonnes 2 et 3
+
+
         self.quitter.clicked.connect(self.quitter_app)
+        self.aide.clicked.connect(self.aide_util)
 
         self.setLayout(disposition_grille)
 
@@ -71,6 +77,43 @@ class MaFenetre(QWidget):
         if self.est_connecte:
             self.deconnexion_du_serveur()
         self.close()
+
+
+
+    def aide_util(self):
+        message_box = QMessageBox()
+        message_box.setIcon(QMessageBox.Icon.Information) 
+        message_box.setWindowTitle("Aide")             
+
+        # Définir le texte d'aide avec toutes les informations importantes
+        message_box.setText(
+            "Client PyQt6 - Connexion au Serveur\n\n"
+            "1. Connexion au serveur\n"
+            "   - Entrez l'IP et le port du serveur.\n"
+            "   - Cliquez sur 'Connexion' pour vous connecter.\n"
+            "   - Si déjà connecté, un message d'erreur s'affichera.\n\n"
+            "2. Sélection de fichier\n"
+            "   - Cliquez sur 'Sélectionner un fichier' pour choisir un fichier à envoyer.\n"
+            "   - Les formats supportés sont C, C++, Java, Python.\n\n"
+            "3. Envoi de fichier\n"
+            "   - Après la sélection, cliquez sur 'Envoyer' pour transmettre le fichier au serveur.\n\n"
+            "4. Historique des logs\n"
+            "   - Affiche les messages de connexion, déconnexion et envoi/réception de fichiers.\n\n"
+            "5. Déconnexion\n"
+            "   - Cliquez sur 'Déconnexion' pour fermer la connexion avec le serveur.\n\n"
+            "6. Quitter\n"
+            "   - Ferme l'application.\n\n"
+            "Si vous avez des questions, consultez la documentation."
+        ) 
+
+        # Ajouter un bouton "Ok"
+        message_box.setStandardButtons(QMessageBox.StandardButton.Ok)
+        
+        # Afficher le message
+        message_box.exec()
+
+
+
 
     def connexion_au_serveur(self):
         ip = self.ip_input.text()
