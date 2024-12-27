@@ -105,21 +105,29 @@ class ServerMaitre:
             
             mem_usage = {}
             for line in containers_stats:
+                if '\t' not in line:
+                    continue
+
                 name, mem_perc = line.split('\t')
-                # Supprimer le symbole % à la fin
-                mem_usage[name] = float(mem_perc.rstrip('%'))
-            
-            sae_server_esclave1_1 = mem_usage.get('sae-server-esclave1-1', 'N/A')
-            sae_server_esclave2_1 = mem_usage.get('sae-server-esclave2-1', 'N/A')
-            sae_server_esclave3_1 = mem_usage.get('sae-server-esclave3-1', 'N/A')
-            sae_server_esclave4_1 = mem_usage.get('sae-server-esclave4-1', 'N/A')
-            
+
+                if mem_perc == 'N/A':
+                    mem_usage[name] = 0.0
+                else:
+                    try:
+                        mem_usage[name] = float(mem_perc.rstrip('%'))
+                    except ValueError:
+                        print(f"[-] Impossible de convertir la mémoire pour {name} : {mem_perc}")
+                        mem_usage[name] = 0.0
+
+            sae_server_esclave1_1 = mem_usage.get('server-file_server-esclave1_1', 0.0)
+            sae_server_esclave2_1 = mem_usage.get('server-file_server-esclave2_1', 0.0)
+            sae_server_esclave3_1 = mem_usage.get('server-file_server-esclave3_1', 0.0)
+            sae_server_esclave4_1 = mem_usage.get('server-file_server-esclave4_1', 0.0)
 
             return sae_server_esclave1_1, sae_server_esclave2_1, sae_server_esclave3_1, sae_server_esclave4_1
         except Exception as e:
             print(f"An error occurred: {e}")
-            return 'N/A', 'N/A', 'N/A', 'N/A'
-
+            return 0.0, 0.0, 0.0, 0.0
 
 
 
