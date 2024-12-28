@@ -11,7 +11,7 @@ Ce dépôt contient deux dossiers principaux : un pour le client et un pour le s
 (mettre la vidéo de 3 min en mettant l'accent sur la répartition de charge)
 
 
-<iframe src="https://drive.google.com/file/d/1pBh0hXOMSvUkFCvHO3yoAotfAaeKozll/view?usp=drive_link" width="640" height="360" allow="autoplay"></iframe>
+<iframe src="https://drive.google.com/file/d/1pBh0hXOMSvUkFCvHO3yoAotfAaeKozll/preview" width="640" height="360" allow="autoplay"></iframe>
 
 
 
