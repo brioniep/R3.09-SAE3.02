@@ -11,7 +11,11 @@ Ce dépôt contient deux dossiers principaux : un pour le client et un pour le s
 (mettre la vidéo de 3 min en mettant l'accent sur la répartition de charge)
 
 
-## Structure du README
+<video controls>
+        <source src="/R3.09-SAE3.02/v2.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+        </video>
+
 
 Ce README est divisé en trois grandes parties :
 
