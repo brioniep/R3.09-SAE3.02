@@ -12,9 +12,10 @@ Ce dépôt contient deux dossiers principaux : un pour le client et un pour le s
 
 
 <video width="640" height="360" controls>
-    <source src="v2.mp4" type="video/mp4">
+    <source src="./v2.mp4" type="video/mp4">
     Your browser does not support the video tag.
 </video>
+
 
 
 
