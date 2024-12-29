@@ -4,7 +4,7 @@
 
 Ce projet permet d'envoyer à un serveur maître des fichiers de type C, C++, Java et Python depuis un client avec une interface graphique. Une fois les fichiers envoyés, le serveur maître répartit les charges vers différents serveurs esclaves pour qu'ils les exécutent et renvoient le résultat de l'exécution. Les serveurs esclaves sont dans des conteneurs Docker pour mieux les gérer et sécuriser la machine hôte.
 
-Ce dépôt contient deux dossiers principaux : un pour le client et un pour le serveur. Il y a également deux branches dans ce dépôt :
+Il y a deux branches dans ce dépôt :
 - Une branche pour la ressource qui a permis d'avoir une première approche de socket et thread. [branche R3.09](https://github.com/brioniep/R3.09-SAE3.02/tree/R3.09)
 - Une deuxième branche qui montre l'avancement de ce projet. [branche SAE3.02](https://github.com/brioniep/R3.09-SAE3.02/tree/SAE3.02)
 
@@ -19,6 +19,7 @@ Cette branche contient les dossiers suivants :
 
 - `CLIENT-GUI` : Contient le code source de l'interface graphique du client.
 - `SERVER-FILE` : Contient le code source des serveurs maître et esclaves, ainsi que les fichiers de configuration Docker.
+- `Doc-developpeur` : Contient la documentation pour les développeurs. Cette documentation est exactement le même code que le code source de CLIENT-GUI et SERVER-FILE, mais les méthodes sont commentées de manière détaillée.
 - `Doc-developpeur` : Contient la documentation pour les développeurs.
 - `Doc-utilisateur` : Contient la documentation pour les utilisateurs, expliquant les fonctionnalités du projet.
 - `Rapport` : Contient le rapport détaillé du projet, incluant les difficultés, les compétences, la répartition de travail etc.

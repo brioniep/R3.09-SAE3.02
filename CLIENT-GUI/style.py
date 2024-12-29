@@ -40,9 +40,7 @@ def style_connexion(widget):
 
 
 def style_index(widget):
-    """
-    Applique un thème sombre au widget et à ses enfants avec des boutons très contrastés.
-    """
+
     dark_style = """
         QWidget {
             background-color: #1e1e1e;
