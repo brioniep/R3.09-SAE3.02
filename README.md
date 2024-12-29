@@ -88,7 +88,7 @@ Cette partie est à faire chez le client. Pour installer Python et les librairie
     sudo systemctl status ssh
     ```
 
-À la fin de ces installations, vous pouvez enfin utiliser FileZilla pour transférer les fichiers nécessaires sur le serveur Linux.
+À la fin de ces installations, vous pouvez enfin utiliser FileZilla pour transférer le dossier `SERVER-FILE` sur le serveur Linux.
 
 ## Construction des conteneurs 🛠️
 
