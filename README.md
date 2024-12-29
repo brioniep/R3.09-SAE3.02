@@ -11,11 +11,6 @@ Ce dépôt contient deux dossiers principaux : un pour le client et un pour le s
 (mettre la vidéo de 3 min en mettant l'accent sur la répartition de charge)
 
 
-<iframe src="https://drive.google.com/file/d/1pBh0hXOMSvUkFCvHO3yoAotfAaeKozll/preview" width="640" height="360" allow="autoplay"></iframe>
-
-
-https://github.com/brioniep/R3.09-SAE3.02/issues/1#issue-2761688913
-
 
 Ce README est divisé en trois grandes parties :
 
@@ -58,7 +53,6 @@ Téléchargez la version stable de Docker Compose sur le serveur :
 ```bash
 sudo apt install docker-compose
 ```
-
 
 
 

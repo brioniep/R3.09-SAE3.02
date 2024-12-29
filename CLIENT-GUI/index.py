@@ -22,7 +22,7 @@ class MaFenetre(QWidget):
         disposition_grille = QGridLayout()
 
         self.ip = QLabel("@IP srv: ")
-        self.ip_input = QLineEdit("192.168.1.11")
+        self.ip_input = QLineEdit("192.168.1.1")
         self.port = QLabel("Port: ")
         self.port_input = QLineEdit("1234")
         self.connecter = QPushButton("Connexion")
@@ -58,8 +58,8 @@ class MaFenetre(QWidget):
         disposition_grille.addWidget(self.chemin, 1, 2, 1, 2)
         disposition_grille.addWidget(self.fichiers_recus, 2, 2, 3, 2)
 
-        disposition_grille.addWidget(self.quitter, 5, 0, 1, 2)  # Place "quitter" dans la ligne 5, colonnes 0 et 1
-        disposition_grille.addWidget(self.aide, 5, 2, 1, 2)     # Place "aide" dans la ligne 5, colonnes 2 et 3
+        disposition_grille.addWidget(self.quitter, 5, 0, 1, 2)
+        disposition_grille.addWidget(self.aide, 5, 2, 1, 2)    
 
 
         self.quitter.clicked.connect(self.quitter_app)
@@ -129,7 +129,9 @@ class MaFenetre(QWidget):
 
         try:
             self.socket_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.socket_client.settimeout(3) 
             self.socket_client.connect((ip, port))
+            self.socket_client.settimeout(None)  
             self.est_connecte = True
             self.selection_fichier.setEnabled(True)
             self.telecharger.setEnabled(True)
@@ -140,6 +142,9 @@ class MaFenetre(QWidget):
 
             self.historique_logs.append(f"<span style='color: green;'>[+]</span>Connexion réussie à {ip}:{port}")
 
+        except socket.timeout:
+            self.historique_logs.append(f"<span style='color: red;'>[-]</span> Erreur : Connexion au serveur {ip}:{port} a expiré.")
+            print(f"[-] Erreur : Connexion au serveur {ip}:{port} a expiré.")
         except Exception as e:
             self.historique_logs.append(f"<span style='color: red;'>[-]</span> Erreur lors de la connexion : {e}")
             print(f"[-] Erreur lors de la connexion : {e}")
