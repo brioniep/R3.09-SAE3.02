@@ -11,7 +11,7 @@ Ce dépôt contient deux dossiers principaux : un pour le client et un pour le s
 ## Vidéo de démonstration du projet
 
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/00G1Ab70aAY" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+[![Regarder la vidéo](https://img.youtube.com/vi/00G1Ab70aAY/0.jpg)](https://www.youtube.com/watch?v=00G1Ab70aAY)
 
 ## Contenu de la branche
 
