@@ -6,10 +6,12 @@ from PyQt6.QtCore import *
 import re
 
 class MaFenetre(QWidget):
-    def __init__(self,):  
+    def __init__(self, authenticated=False):  
         super().__init__()
 
-
+        if not authenticated:
+            QMessageBox.critical(None, "Erreur", "Accès non autorisé. Veuillez vous connecter.")
+            sys.exit() 
 
         self.setWindowTitle("Client PyQt6 - Connexion au Serveur")
         self.socket_client = None
