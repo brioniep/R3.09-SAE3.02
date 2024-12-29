@@ -7,9 +7,11 @@ Ce projet permet d'envoyer à un serveur maître des fichiers de type C, C++, Ja
 Ce dépôt contient deux dossiers principaux : un pour le client et un pour le serveur. Il y a également deux branches dans ce dépôt :
 - Une branche pour la ressource qui a permis d'avoir une première approche de socket et thread. [branche R3.09](https://github.com/brioniep/R3.09-SAE3.02/tree/R3.09)
 - Une deuxième branche qui montre l'avancement de ce projet. [branche SAE3.02](https://github.com/brioniep/R3.09-SAE3.02/tree/SAE3.02)
-- Voici une vidéo de démonstration du projet
-(mettre la vidéo de 3 min en mettant l'accent sur la répartition de charge)
 
+## Vidéo de démonstration du projet
+
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/00G1Ab70aAY" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 ## Contenu de la branche
 
