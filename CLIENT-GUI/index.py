@@ -6,12 +6,10 @@ from PyQt6.QtCore import *
 import re
 
 class MaFenetre(QWidget):
-    def __init__(self, authenticated=False):  
+    def __init__(self,):  
         super().__init__()
 
-        if not authenticated:
-            QMessageBox.critical(None, "Erreur", "Accès non autorisé. Veuillez vous connecter.")
-            sys.exit() 
+
 
         self.setWindowTitle("Client PyQt6 - Connexion au Serveur")
         self.socket_client = None
@@ -103,7 +101,7 @@ class MaFenetre(QWidget):
             "   - Cliquez sur 'Déconnexion' pour fermer la connexion avec le serveur.\n\n"
             "6. Quitter\n"
             "   - Ferme l'application.\n\n"
-            "Si vous avez des questions, consultez la documentation."
+            "Pour plus de précisions, consultez la documentation."
         )
         message_box.setStandardButtons(QMessageBox.StandardButton.Ok)
         message_box.exec()
@@ -127,27 +125,34 @@ class MaFenetre(QWidget):
             self.historique_logs.append("<span style='color: red;'>[-]</span> Déjà connecté au serveur.")
             return
 
-        try:
-            self.socket_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.socket_client.settimeout(3) 
-            self.socket_client.connect((ip, port))
-            self.socket_client.settimeout(None)  
-            self.est_connecte = True
-            self.selection_fichier.setEnabled(True)
-            self.telecharger.setEnabled(True)
+        def essayer_connexion():
+            while not self.est_connecte:
+                try:
+                    self.socket_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    self.socket_client.settimeout(3)
+                    self.socket_client.connect((ip, port))
+                    self.socket_client.settimeout(None)
+                    self.est_connecte = True
+                    self.selection_fichier.setEnabled(True)
+                    self.telecharger.setEnabled(True)
 
-            self.recepteur_thread = QThread(self)
-            self.recepteur_thread.run = self.recevoir_donnees
-            self.recepteur_thread.start()
+                    self.recepteur_thread = QThread(self)
+                    self.recepteur_thread.run = self.recevoir_donnees
+                    self.recepteur_thread.start()
 
-            self.historique_logs.append(f"<span style='color: green;'>[+]</span>Connexion réussie à {ip}:{port}")
+                    self.historique_logs.append(f"<span style='color: green;'>[+]</span>Connexion réussie à {ip}:{port}")
+                except socket.timeout:
+                    self.historique_logs.append(f"<span style='color: red;'>[-]</span> Erreur : Connexion au serveur {ip}:{port} a expiré. Réessai dans 5 secondes.")
+                    print(f"[-] Erreur : Connexion au serveur {ip}:{port} a expiré. Réessai dans 5 secondes.")
+                    QThread.sleep(5)
+                except Exception as e:
+                    self.historique_logs.append(f"<span style='color: red;'>[-]</span> Erreur lors de la connexion : {e}. Réessai dans 5 secondes.")
+                    print(f"[-] Erreur lors de la connexion : {e}. Réessai dans 5 secondes.")
+                    QThread.sleep(5)
 
-        except socket.timeout:
-            self.historique_logs.append(f"<span style='color: red;'>[-]</span> Erreur : Connexion au serveur {ip}:{port} a expiré.")
-            print(f"[-] Erreur : Connexion au serveur {ip}:{port} a expiré.")
-        except Exception as e:
-            self.historique_logs.append(f"<span style='color: red;'>[-]</span> Erreur lors de la connexion : {e}")
-            print(f"[-] Erreur lors de la connexion : {e}")
+        self.connexion_thread = QThread(self)
+        self.connexion_thread.run = essayer_connexion
+        self.connexion_thread.start()
 
     def deconnexion_du_serveur(self):
         if self.est_connecte:
