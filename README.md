@@ -11,9 +11,19 @@ Ce dépôt contient deux dossiers principaux : un pour le client et un pour le s
 (mettre la vidéo de 3 min en mettant l'accent sur la répartition de charge)
 
 
+## Contenu de la branche
+
+Cette branche contient les dossiers suivants :
+
+- `CLIENT-GUI` : Contient le code source de l'interface graphique du client.
+- `SERVER-FILE` : Contient le code source des serveurs maître et esclaves, ainsi que les fichiers de configuration Docker.
+- `Doc-developpeur` : Contient la documentation pour les développeurs.
+- `Doc-utilisateur` : Contient la documentation pour les utilisateurs, expliquant les fonctionnalités du projet.
+- `Rapport` : Contient le rapport détaillé du projet, incluant les difficultés, les compétences, la répartition de travail etc.
+- `vidéo` : Contient la vidéo de démonstration du projet.
 
 
-# Documentation d'installation
+# Documentation d'installation et d'utilisation
 
 ### Table des matières
 
@@ -118,17 +128,3 @@ python3 connexion.py
 ```
 
 > **Note** : Le nom d'utilisateur par défaut est "toto" et le mot de passe par défaut est également "toto". Si vous avez besoin de changer ces identifiants, veuillez consulter la documentation développeur.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
