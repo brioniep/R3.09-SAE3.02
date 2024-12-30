@@ -145,11 +145,9 @@ class MaFenetre(QWidget):
                     self.historique_logs.append(f"<span style='color: green;'>[+]</span>Connexion réussie à {ip}:{port}")
                 except socket.timeout:
                     self.historique_logs.append(f"<span style='color: red;'>[-]</span> Erreur : Connexion au serveur {ip}:{port} a expiré. Réessai dans 5 secondes.")
-                    print(f"[-] Erreur : Connexion au serveur {ip}:{port} a expiré. Réessai dans 5 secondes.")
                     QThread.sleep(5)
                 except Exception as e:
                     self.historique_logs.append(f"<span style='color: red;'>[-]</span> Erreur lors de la connexion : {e}. Réessai dans 5 secondes.")
-                    print(f"[-] Erreur lors de la connexion : {e}. Réessai dans 5 secondes.")
                     QThread.sleep(5)
 
         self.connexion_thread = QThread(self)
@@ -164,7 +162,6 @@ class MaFenetre(QWidget):
                 self.selection_fichier.setEnabled(False)
                 self.telecharger.setEnabled(False)
                 self.historique_logs.append("<span style='color: green;'>[+]</span> Déconnexion réussie.")
-                print("Déconnexion réussie.")
                 if self.recepteur_thread:
                     self.recepteur_thread.quit()
                     self.recepteur_thread = None
