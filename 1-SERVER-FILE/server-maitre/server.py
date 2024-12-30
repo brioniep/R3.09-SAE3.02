@@ -1,3 +1,4 @@
+
 import socket, threading, subprocess
 
 class ServerMaitre:
@@ -110,6 +111,10 @@ class ServerMaitre:
 
                 name, mem_perc = line.split('\t')
 
+                # Debug: Afficher la valeur récupérée de mémoire
+                print(f"Conteneur: {name}, Mémoire: {mem_perc}")
+
+                # Si la valeur de mémoire est 'N/A', la considérer comme 0.0%
                 if mem_perc == 'N/A':
                     mem_usage[name] = 0.0
                 else:
@@ -119,15 +124,16 @@ class ServerMaitre:
                         print(f"[-] Impossible de convertir la mémoire pour {name} : {mem_perc}")
                         mem_usage[name] = 0.0
 
-            sae_server_esclave1_1 = mem_usage.get('server-file_server-esclave1_1', 0.0)
-            sae_server_esclave2_1 = mem_usage.get('server-file_server-esclave2_1', 0.0)
-            sae_server_esclave3_1 = mem_usage.get('server-file_server-esclave3_1', 0.0)
-            sae_server_esclave4_1 = mem_usage.get('server-file_server-esclave4_1', 0.0)
+            sae_server_esclave1_1 = mem_usage.get('1-server-file_server-esclave1_1', 0.0)
+            sae_server_esclave2_1 = mem_usage.get('1-server-file_server-esclave2_1', 0.0)
+            sae_server_esclave3_1 = mem_usage.get('1-server-file_server-esclave3_1', 0.0)
+            sae_server_esclave4_1 = mem_usage.get('1-server-file_server-esclave4_1', 0.0)
 
             return sae_server_esclave1_1, sae_server_esclave2_1, sae_server_esclave3_1, sae_server_esclave4_1
         except Exception as e:
             print(f"An error occurred: {e}")
             return 0.0, 0.0, 0.0, 0.0
+
 
 
 
