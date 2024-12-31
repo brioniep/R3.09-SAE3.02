@@ -17,7 +17,7 @@ Il y a deux branches dans ce dépôt :
 
 Cette branche contient les dossiers suivants :
 
-- `CLIENT-GUI` : Contient le code source de l'interface graphique du client.
+- `CLIENT-GUI` : Contient le code source de l'interface graphique du client, ainsi que des fichiers de test pour le loadbalancing.
 - `SERVER-FILE` : Contient le code source des serveurs maître et esclaves, ainsi que les fichiers de configuration Docker.
 - `Doc-developpeur` : Contient la documentation pour les développeurs. Cette documentation est exactement le même code que le code source de CLIENT-GUI et SERVER-FILE, mais les méthodes sont commentées de manière détaillée.
 - `Doc-developpeur` : Contient la documentation pour les développeurs.
